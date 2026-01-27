@@ -16,7 +16,6 @@ enum AppointmentStatus {
   REQUESTED
   APPROVED
   REJECTED
-  CANCELLED
   COMPLETED
 }
 
@@ -24,7 +23,6 @@ enum PaymentStatus {
   PENDING
   SUCCESS
   FAILED
-  REFUNDED
 }
 
 model User {
