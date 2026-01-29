@@ -127,6 +127,7 @@ export const loginUser = async ({ email, password }: LoginInput) => {
   return {
     user,
     accessToken,
+    refreshToken,
   };
 };
 

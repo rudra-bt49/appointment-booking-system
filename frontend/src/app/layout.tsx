@@ -1,9 +1,7 @@
 import "./globals.css";
-
-export const metadata = {
-  title: "Appointment Booking System",
-  description: "Book appointments with doctors easily",
-};
+import { AuthProvider } from "@/context/auth.context";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default function RootLayout({
   children,
@@ -12,7 +10,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased flex flex-col">
+        <AuthProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
+      </body>
     </html>
   );
 }
