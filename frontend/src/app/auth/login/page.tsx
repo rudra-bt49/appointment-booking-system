@@ -3,6 +3,7 @@
 import { Formik, Form } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import Input from "@/components/common/Input";
 import { loginValidationSchema } from "@/validations/auth.validation";
 import { authService } from "@/services/auth.service";
@@ -26,15 +27,19 @@ export default function LoginPage() {
           validationSchema={loginValidationSchema}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              const res = await authService.login(values);
-              setUser(res.data);
-              // ✅ redirect after successful login
-              router.push(API_ROUTES.HOME);
-            } catch (error: any) {
-              const message =
-                error?.response?.data?.message || "Invalid email or password";
+              const user = await authService.login(values);
 
-              // ✅ route error to correct field
+              setUser(user);
+              router.push(API_ROUTES.HOME);
+            } catch (error: unknown) {
+              const message =
+                (error as {
+                  response?: {
+                    data?: { message?: string };
+                  };
+                })?.response?.data?.message ||
+                "Invalid email or password";
+
               if (message.toLowerCase().includes("email")) {
                 setFieldError("email", message);
               } else {
