@@ -11,7 +11,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get(ROUTES.PROFILE.GET_PROFILE, getProfileController);
-router.put(ROUTES.PROFILE.UPDATE_PROFILE, updateProfileController);
+router.get(ROUTES.PROFILE.GET_PROFILE, authMiddleware, getProfileController);
+router.put(ROUTES.PROFILE.UPDATE_PROFILE, authMiddleware, updateProfileController);
 
 export default router;
