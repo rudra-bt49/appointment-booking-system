@@ -11,6 +11,9 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { validateRegisterInput } from "../utils/validators/auth.validator";
 import { validateLoginInput } from "../utils/validators/auth.validator";
 
+import { getMe } from "../services/auth.service";
+
+
 export const register = async (req: Request, res: Response) => {
   try {
     validateRegisterInput(req.body);
@@ -104,5 +107,17 @@ export const logout = async (req: AuthRequest, res: Response) => {
     return successResponse(res, "Logout successful");
   } catch (error: any) {
     return errorResponse(res, error.message, 400);
+  }
+};
+
+export const me = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+
+    const user = await getMe(userId);
+
+    return successResponse(res, "User authenticated", user);
+  } catch (error: any) {
+    return errorResponse(res, error.message, 401);
   }
 };

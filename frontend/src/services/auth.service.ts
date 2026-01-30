@@ -8,19 +8,31 @@ import {
 
 export const authService = {
   register: async (payload: RegisterPayload): Promise<AuthUser> => {
-    const res = await axiosInstance.post(API_ROUTES.AUTH.REGISTER, payload);
+    const res = await axiosInstance.post(
+      API_ROUTES.AUTH.REGISTER,
+      payload
+    );
     return res.data as AuthUser;
   },
 
   login: async (payload: LoginPayload): Promise<AuthUser> => {
-    const res = await axiosInstance.post(API_ROUTES.AUTH.LOGIN, payload);
+    const res = await axiosInstance.post(
+      API_ROUTES.AUTH.LOGIN,
+      payload
+    );
     return res.data as AuthUser;
   },
 
   refresh: async (refreshToken: string): Promise<AuthUser> => {
-    const res = await axiosInstance.post(API_ROUTES.AUTH.REFRESH, {
-      refreshToken,
-    });
+    const res = await axiosInstance.post(
+      API_ROUTES.AUTH.REFRESH,
+      { refreshToken }
+    );
+    return res.data as AuthUser;
+  },
+
+  me: async (): Promise<AuthUser> => {
+    const res = await axiosInstance.get(API_ROUTES.AUTH.ME);
     return res.data as AuthUser;
   },
 

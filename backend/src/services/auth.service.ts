@@ -175,3 +175,22 @@ export const logoutUser = async (userId: number) => {
     where: { userId },
   });
 };
+
+export const getMe = async (userId: number) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      fullName: true,
+      phone: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};

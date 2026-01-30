@@ -2,11 +2,12 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
+import profileRoutes from "./routes/profile.routes";
 
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000", // frontend URL
+  origin: "http://localhost:3000",
   credentials: true,
 }));
 
@@ -18,5 +19,6 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);
 
 export default app;

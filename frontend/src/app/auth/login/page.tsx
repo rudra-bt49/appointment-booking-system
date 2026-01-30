@@ -27,9 +27,10 @@ export default function LoginPage() {
           validationSchema={loginValidationSchema}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
-              const user = await authService.login(values);
+              const response = await authService.login(values);
 
-              setUser(user);
+              setUser(response);
+              localStorage.setItem("user", JSON.stringify(response));
               router.push(API_ROUTES.HOME);
             } catch (error: unknown) {
               const message =

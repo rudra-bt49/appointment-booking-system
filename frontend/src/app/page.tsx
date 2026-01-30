@@ -1,3 +1,5 @@
+import API_ROUTES from "@/config/routes";
+
 export default function HomePage() {
   return (
     <main className="bg-gray-50">
@@ -19,14 +21,14 @@ export default function HomePage() {
 
           <div className="mt-8 flex justify-center gap-4">
             <a
-              href="/doctors"
+              href={API_ROUTES.DOCTOR}
               className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Find Doctors
             </a>
 
             <a
-              href="/auth/register"
+              href={API_ROUTES.AUTH.REGISTER}
               className="rounded-lg border border-blue-600 px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition"
             >
               Get Started
