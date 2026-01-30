@@ -2,6 +2,10 @@ const API_ROUTES = {
   HOME: "/",
   DOCTOR: "/doctors",
   PROFILE: "/profile",
+  PROFILES: {
+    GET_PROFILE: "/profile/get-profile",
+    EDIT_PROFILE: "/profile/edit-profile",
+  },
   AUTH: {
     REGISTER: "/auth/register",
     LOGIN: "/auth/login",
