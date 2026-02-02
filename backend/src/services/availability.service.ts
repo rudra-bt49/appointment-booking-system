@@ -20,17 +20,14 @@ export const availabilityService = {
             throw new Error("Doctor profile not found");
         }
 
-        // Parse YYYY-MM-DD safely
         const [y, m, d] = payload.date.split("-").map(Number);
 
         if (!y || !m || !d) {
             throw new Error("Invalid date format");
         }
 
-        // Force DATE without timezone shift
         const availabilityDate = new Date(Date.UTC(y, m - 1, d));
 
-        // Get today's date in UTC (midnight)
         const now = new Date();
         const todayUTC = new Date(
             Date.UTC(
@@ -40,7 +37,6 @@ export const availabilityService = {
             )
         );
 
-        // ❌ Block today & past dates
         if (availabilityDate <= todayUTC) {
             throw new Error("Availability date must be in the future");
         }
@@ -53,9 +49,8 @@ export const availabilityService = {
         });
     },
 
-
     // ===============================
-    // CREATE TIME SLOTS (IST SAFE)
+    // CREATE TIME SLOTS (DATE SAFE)
     // ===============================
     async createTimeSlots(
         userId: number,
@@ -66,7 +61,6 @@ export const availabilityService = {
             where: { id: availabilityId },
             include: {
                 doctor: true,
-                timeSlots: true,
             },
         });
 
@@ -78,7 +72,6 @@ export const availabilityService = {
             throw new Error("Unauthorized");
         }
 
-        // Extract DATE parts safely
         const baseDate = availability.date;
         const year = baseDate.getUTCFullYear();
         const month = baseDate.getUTCMonth();
@@ -94,27 +87,12 @@ export const availabilityService = {
             const [sh, sm, ss = "0"] = slot.startTime.split(":");
             const [eh, em, es = "0"] = slot.endTime.split(":");
 
-            // 🔥 CRITICAL FIX — USE UTC
             const startTime = new Date(
-                Date.UTC(
-                    year,
-                    month,
-                    day,
-                    Number(sh),
-                    Number(sm),
-                    Number(ss)
-                )
+                Date.UTC(year, month, day, Number(sh), Number(sm), Number(ss))
             );
 
             const endTime = new Date(
-                Date.UTC(
-                    year,
-                    month,
-                    day,
-                    Number(eh),
-                    Number(em),
-                    Number(es)
-                )
+                Date.UTC(year, month, day, Number(eh), Number(em), Number(es))
             );
 
             if (
@@ -128,12 +106,14 @@ export const availabilityService = {
                 throw new Error("Start time must be before end time");
             }
 
-            // Overlap check
-            const overlap = availability.timeSlots.some(
-                (existing) =>
-                    startTime < existing.endTime &&
-                    endTime > existing.startTime
-            );
+            // ✅ FIX: DB-level overlap check scoped to SAME availability only
+            const overlap = await prisma.timeSlot.findFirst({
+                where: {
+                    availabilityId,
+                    startTime: { lt: endTime },
+                    endTime: { gt: startTime },
+                },
+            });
 
             if (overlap) {
                 throw new Error("Time slot overlaps with existing slot");
@@ -205,6 +185,7 @@ export const availabilityService = {
             where: { id: slotId },
         });
     },
+
     // ===============================
     // GET TIME SLOTS BY DOCTOR & DATE
     // ===============================
@@ -220,10 +201,8 @@ export const availabilityService = {
             throw new Error("Invalid date format");
         }
 
-        // Force UTC date (midnight)
         const availabilityDate = new Date(Date.UTC(y, m - 1, d));
 
-        // Find availability
         const availability = await prisma.doctorAvailability.findFirst({
             where: {
                 doctorId,
@@ -235,7 +214,6 @@ export const availabilityService = {
             return [];
         }
 
-        // Fetch slots
         const slots = await prisma.timeSlot.findMany({
             where: {
                 availabilityId: availability.id,
@@ -251,10 +229,9 @@ export const availabilityService = {
             },
         });
 
-        return { 
-            slots, 
-            availabilityId: availability.id
+        return {
+            slots,
+            availabilityId: availability.id,
         };
-    }
-
+    },
 };
