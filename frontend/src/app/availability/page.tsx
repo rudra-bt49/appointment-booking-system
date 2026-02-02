@@ -21,11 +21,20 @@ export default function AvailabilityPage() {
   const fetchSlots = async (date: string) => {
     try {
       setLoading(true);
+
+      // 🔥 CRITICAL FIX:
+      // availabilityId must NOT leak across dates
+      localStorage.removeItem("doctorAvailabilityId");
+
       const res = await availabilityService.getSlotsByDoctorAndDate(date);
-      localStorage.setItem(
-        "doctorAvailabilityId",
-        String(res.data.availabilityId)
-      );
+
+      if (res.data.availabilityId) {
+        localStorage.setItem(
+          "doctorAvailabilityId",
+          String(res.data.availabilityId)
+        );
+      }
+
       setSlots(res.data.slots);
     } catch {
       setSlots([]);
@@ -57,7 +66,11 @@ export default function AvailabilityPage() {
   // ===============================
   // UPDATE SLOT ROW
   // ===============================
-  const updateRow = (index: number, key: "startTime" | "endTime", value: string) => {
+  const updateRow = (
+    index: number,
+    key: "startTime" | "endTime",
+    value: string
+  ) => {
     const copy = [...newSlots];
     copy[index][key] = value;
     setNewSlots(copy);
@@ -67,9 +80,10 @@ export default function AvailabilityPage() {
   // CREATE AVAILABILITY + SLOTS
   // ===============================
   const handleCreateSlots = async () => {
-    if(!localStorage.getItem("doctorAvailabilityId")) {
+    if (!localStorage.getItem("doctorAvailabilityId")) {
       await availabilityService.createAvailability({ date: selectedDate });
     }
+
     await availabilityService.createTimeSlots({ slots: newSlots });
 
     setShowCreate(false);
@@ -143,13 +157,17 @@ export default function AvailabilityPage() {
                   <input
                     type="time"
                     value={slot.startTime}
-                    onChange={(e) => updateRow(i, "startTime", e.target.value)}
+                    onChange={(e) =>
+                      updateRow(i, "startTime", e.target.value)
+                    }
                     className="rounded-lg border p-2"
                   />
                   <input
                     type="time"
                     value={slot.endTime}
-                    onChange={(e) => updateRow(i, "endTime", e.target.value)}
+                    onChange={(e) =>
+                      updateRow(i, "endTime", e.target.value)
+                    }
                     className="rounded-lg border p-2"
                   />
                 </div>
