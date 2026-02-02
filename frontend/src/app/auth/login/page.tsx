@@ -3,6 +3,7 @@
 import { Formik, Form } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 import Input from "@/components/common/Input";
 import { loginValidationSchema } from "@/validations/auth.validation";
@@ -29,9 +30,21 @@ export default function LoginPage() {
             try {
               const response = await authService.login(values);
 
+              // ✅ success alert
+              Swal.fire({
+                icon: "success",
+                title: "Login Successful",
+                text: "Welcome 👋",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+
               setUser(response);
               localStorage.setItem("user", JSON.stringify(response));
-              router.push(API_ROUTES.HOME);
+
+              setTimeout(() => {
+                router.push(API_ROUTES.HOME);
+              }, 1500);
             } catch (error: unknown) {
               const message =
                 (error as {
@@ -40,6 +53,13 @@ export default function LoginPage() {
                   };
                 })?.response?.data?.message ||
                 "Invalid email or password";
+
+              // ❌ error alert
+              Swal.fire({
+                icon: "error",
+                title: "Login Failed",
+                text: message,
+              });
 
               if (message.toLowerCase().includes("email")) {
                 setFieldError("email", message);
@@ -76,7 +96,7 @@ export default function LoginPage() {
                 disabled={isSubmitting}
                 className="mt-2 rounded-lg bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 transition disabled:opacity-60"
               >
-                Login
+                {isSubmitting ? "Logging in..." : "Login"}
               </button>
 
               <p className="mt-4 text-center text-sm text-gray-600">

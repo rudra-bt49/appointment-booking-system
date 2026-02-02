@@ -1,4 +1,4 @@
-import API_ROUTES from "@/config/routes";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -20,19 +20,20 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex justify-center gap-4">
-            <a
-              href={API_ROUTES.DOCTOR}
+            {/* ✅ Correct page navigation */}
+            <Link
+              href="/doctor"
               className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
               Find Doctors
-            </a>
+            </Link>
 
-            <a
-              href={API_ROUTES.AUTH.REGISTER}
+            <Link
+              href="/auth/register"
               className="rounded-lg border border-blue-600 px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition"
             >
               Get Started
-            </a>
+            </Link>
           </div>
         </div>
       </section>

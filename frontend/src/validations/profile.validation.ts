@@ -6,9 +6,6 @@ const EMAIL_REGEX =
 const FULL_NAME_REGEX =
   /^[A-Za-z]+(?:\s+[A-Za-z]+)+$/;
 
-const PHONE_REGEX =
-  /^\d{10}$/;
-
 export const profileValidationSchema = Yup.object({
   fullName: Yup.string()
     .required("Full name is required")
@@ -23,10 +20,8 @@ export const profileValidationSchema = Yup.object({
 
   phone: Yup.string()
     .required("Phone number is required")
-    .matches(
-      PHONE_REGEX,
-      "Phone number must be exactly 10 digits"
-    ),
+    .matches(/^\d+$/, "Phone number must contain only digits")
+    .length(10, "Phone number must be exactly 10 digits"),
 
   specialization: Yup.string().when("role", {
     is: "DOCTOR",
@@ -38,7 +33,9 @@ export const profileValidationSchema = Yup.object({
   experience: Yup.string().when("role", {
     is: "DOCTOR",
     then: (schema) =>
-      schema.required("Experience is required"),
+      schema
+        .required("Experience is required")
+        .matches(/^\d+$/, "Experience must be a number"),
     otherwise: (schema) => schema.notRequired(),
   }),
 

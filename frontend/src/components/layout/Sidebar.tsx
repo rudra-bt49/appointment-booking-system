@@ -27,7 +27,7 @@ const navItems = [
   },
   {
     label: "Manage Time Slot",
-    href: "/doctor/time-slots",
+    href: "/availability",
     icon: Clock,
   },
   {
@@ -46,6 +46,10 @@ export default function Sidebar() {
   const handleLogout = () => {
     logout();
     localStorage.removeItem("user");
+    localStorage.removeItem("doctorProfileId");
+    localStorage.removeItem("doctorAvailabilityId");
+    localStorage.removeItem("doctorSlotIds");
+
     router.push(API_ROUTES.AUTH.LOGIN);
   };
 

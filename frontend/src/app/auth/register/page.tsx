@@ -4,6 +4,8 @@
 import { Formik, Form } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+
 import Input from "@/components/common/Input";
 import { registerValidationSchema } from "@/validations/auth.validation";
 import { authService } from "@/services/auth.service";
@@ -93,7 +95,33 @@ export default function RegisterPage() {
 
               await authService.register(payload);
 
-              router.push(API_ROUTES.AUTH.LOGIN);
+              // ✅ success alert
+              Swal.fire({
+                icon: "success",
+                title: "Registration Successful",
+                text: "Your account has been created 🎉",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+
+              setTimeout(() => {
+                router.push(API_ROUTES.AUTH.LOGIN);
+              }, 1500);
+            } catch (error: unknown) {
+              const message =
+                (error as {
+                  response?: {
+                    data?: { message?: string };
+                  };
+                })?.response?.data?.message ||
+                "Something went wrong. Please try again.";
+
+              // ❌ error alert
+              Swal.fire({
+                icon: "error",
+                title: "Registration Failed",
+                text: message,
+              });
             } finally {
               setSubmitting(false);
             }
@@ -255,7 +283,7 @@ export default function RegisterPage() {
                   disabled={isSubmitting}
                   className="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition"
                 >
-                  Sign Up
+                  {isSubmitting ? "Signing up..." : "Sign Up"}
                 </button>
 
                 <p className="mt-4 text-center text-sm text-gray-600">
