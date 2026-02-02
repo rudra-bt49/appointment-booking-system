@@ -9,7 +9,14 @@ const ROUTES = {
   PROFILE: {
     GET_PROFILE: "/get-profile",
     UPDATE_PROFILE: "/edit-profile",
-  }
+  },
+  DOCTOR: {
+    GET_ALL: "/doctors",
+    GET_BY_ID: "/doctors/:id",
+  },
+  DOCTOR_AVAILABILITY: {
+    BASE: "/doctor",
+  },
 };
 
 export default ROUTES;

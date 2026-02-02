@@ -1,0 +1,260 @@
+import prisma from "../config/prisma";
+import {
+    CreateAvailabilityPayload,
+    CreateTimeSlotsPayload,
+} from "../types/availability.types";
+
+export const availabilityService = {
+    // ===============================
+    // CREATE AVAILABILITY (DATE ONLY)
+    // ===============================
+    async createAvailability(
+        userId: number,
+        payload: CreateAvailabilityPayload
+    ) {
+        const doctor = await prisma.doctorProfile.findUnique({
+            where: { userId },
+        });
+
+        if (!doctor) {
+            throw new Error("Doctor profile not found");
+        }
+
+        // Parse YYYY-MM-DD safely
+        const [y, m, d] = payload.date.split("-").map(Number);
+
+        if (!y || !m || !d) {
+            throw new Error("Invalid date format");
+        }
+
+        // Force DATE without timezone shift
+        const availabilityDate = new Date(Date.UTC(y, m - 1, d));
+
+        // Get today's date in UTC (midnight)
+        const now = new Date();
+        const todayUTC = new Date(
+            Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate()
+            )
+        );
+
+        // ❌ Block today & past dates
+        if (availabilityDate <= todayUTC) {
+            throw new Error("Availability date must be in the future");
+        }
+
+        return prisma.doctorAvailability.create({
+            data: {
+                doctorId: doctor.id,
+                date: availabilityDate,
+            },
+        });
+    },
+
+
+    // ===============================
+    // CREATE TIME SLOTS (IST SAFE)
+    // ===============================
+    async createTimeSlots(
+        userId: number,
+        availabilityId: number,
+        payload: CreateTimeSlotsPayload
+    ) {
+        const availability = await prisma.doctorAvailability.findUnique({
+            where: { id: availabilityId },
+            include: {
+                doctor: true,
+                timeSlots: true,
+            },
+        });
+
+        if (!availability) {
+            throw new Error("Availability not found");
+        }
+
+        if (availability.doctor.userId !== userId) {
+            throw new Error("Unauthorized");
+        }
+
+        // Extract DATE parts safely
+        const baseDate = availability.date;
+        const year = baseDate.getUTCFullYear();
+        const month = baseDate.getUTCMonth();
+        const day = baseDate.getUTCDate();
+
+        const slotsToCreate: {
+            availabilityId: number;
+            startTime: Date;
+            endTime: Date;
+        }[] = [];
+
+        for (const slot of payload.slots) {
+            const [sh, sm, ss = "0"] = slot.startTime.split(":");
+            const [eh, em, es = "0"] = slot.endTime.split(":");
+
+            // 🔥 CRITICAL FIX — USE UTC
+            const startTime = new Date(
+                Date.UTC(
+                    year,
+                    month,
+                    day,
+                    Number(sh),
+                    Number(sm),
+                    Number(ss)
+                )
+            );
+
+            const endTime = new Date(
+                Date.UTC(
+                    year,
+                    month,
+                    day,
+                    Number(eh),
+                    Number(em),
+                    Number(es)
+                )
+            );
+
+            if (
+                isNaN(startTime.getTime()) ||
+                isNaN(endTime.getTime())
+            ) {
+                throw new Error("Invalid time format");
+            }
+
+            if (startTime >= endTime) {
+                throw new Error("Start time must be before end time");
+            }
+
+            // Overlap check
+            const overlap = availability.timeSlots.some(
+                (existing) =>
+                    startTime < existing.endTime &&
+                    endTime > existing.startTime
+            );
+
+            if (overlap) {
+                throw new Error("Time slot overlaps with existing slot");
+            }
+
+            slotsToCreate.push({
+                availabilityId,
+                startTime,
+                endTime,
+            });
+        }
+
+        return prisma.timeSlot.createMany({
+            data: slotsToCreate,
+        });
+    },
+
+    // ===============================
+    // GET DOCTOR AVAILABILITY
+    // ===============================
+    async getDoctorAvailability(userId: number) {
+        const doctor = await prisma.doctorProfile.findUnique({
+            where: { userId },
+            include: {
+                availabilities: {
+                    orderBy: { date: "asc" },
+                    include: {
+                        timeSlots: {
+                            orderBy: { startTime: "asc" },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!doctor) {
+            throw new Error("Doctor profile not found");
+        }
+
+        return doctor.availabilities;
+    },
+
+    // ===============================
+    // DELETE TIME SLOT
+    // ===============================
+    async deleteTimeSlot(userId: number, slotId: number) {
+        const slot = await prisma.timeSlot.findUnique({
+            where: { id: slotId },
+            include: {
+                availability: {
+                    include: { doctor: true },
+                },
+            },
+        });
+
+        if (!slot) {
+            throw new Error("Slot not found");
+        }
+
+        if (slot.isBooked) {
+            throw new Error("Slot already booked");
+        }
+
+        if (slot.availability.doctor.userId !== userId) {
+            throw new Error("Unauthorized");
+        }
+
+        await prisma.timeSlot.delete({
+            where: { id: slotId },
+        });
+    },
+    // ===============================
+    // GET TIME SLOTS BY DOCTOR & DATE
+    // ===============================
+    async getSlotsByDoctorAndDate(payload: {
+        doctorId: number;
+        date: string;
+    }) {
+        const { doctorId, date } = payload;
+
+        const [y, m, d] = date.split("-").map(Number);
+
+        if (!y || !m || !d) {
+            throw new Error("Invalid date format");
+        }
+
+        // Force UTC date (midnight)
+        const availabilityDate = new Date(Date.UTC(y, m - 1, d));
+
+        // Find availability
+        const availability = await prisma.doctorAvailability.findFirst({
+            where: {
+                doctorId,
+                date: availabilityDate,
+            },
+        });
+
+        if (!availability) {
+            return [];
+        }
+
+        // Fetch slots
+        const slots = await prisma.timeSlot.findMany({
+            where: {
+                availabilityId: availability.id,
+            },
+            orderBy: {
+                startTime: "asc",
+            },
+            select: {
+                id: true,
+                startTime: true,
+                endTime: true,
+                isBooked: true,
+            },
+        });
+
+        return { 
+            slots, 
+            availabilityId: availability.id
+        };
+    }
+
+};

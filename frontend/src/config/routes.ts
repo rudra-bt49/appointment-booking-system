@@ -1,6 +1,17 @@
 const API_ROUTES = {
   HOME: "/",
-  DOCTOR: "/doctors",
+  DOCTOR: {
+    GET_ME_ID: "/doctors/me/id",
+    GET_ALL: "/doctors",
+    GET_BY_ID: "/doctors/:id",
+  },
+  AVAILABILITY: {
+    CREATE: "/doctor/availability",
+    CREATE_SLOTS: "/doctor/availability/:availabilityId/slots",
+    GET_MY: "/doctor/availability",
+    DELETE_SLOT: "/doctor/slots/:slotId",
+    GET_SLOTS_BY_DATE: "/doctor/availability/slots/by-date",
+  },
   PROFILE: "/profile",
   PROFILES: {
     GET_PROFILE: "/profile/get-profile",

@@ -97,11 +97,11 @@ model DoctorAvailability {
 }
 
 model TimeSlot {
-  id              Int      @id @default(autoincrement())
-  availabilityId  Int
+  id             Int      @id @default(autoincrement())
+  availabilityId Int
 
-  startTime DateTime
-  endTime   DateTime
+  startTime DateTime @db.Timestamp(0)
+  endTime   DateTime @db.Timestamp(0)
 
   isBooked  Boolean @default(false)
 
@@ -111,6 +111,7 @@ model TimeSlot {
   availability DoctorAvailability @relation(fields: [availabilityId], references: [id], onDelete: Cascade)
   appointment  Appointment?
 }
+
 
 model Appointment {
   id        Int      @id @default(autoincrement())

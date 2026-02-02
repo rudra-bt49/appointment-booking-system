@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import { useAuth } from "@/context/auth.context";
 import { User } from "lucide-react";
 import API_ROUTES from "@/config/routes";
@@ -10,10 +11,37 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
 
-  const handleLogout = () => {
-    logout();
-    localStorage.removeItem("user");
-    router.push(API_ROUTES.AUTH.LOGIN);
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Logout?",
+      text: "Are you sure you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, logout",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      logout();
+      localStorage.removeItem("user");
+      localStorage.removeItem("doctorProfileId");
+      localStorage.removeItem("doctorAvailabilityId");
+      localStorage.removeItem("doctorSlotIds");
+
+      Swal.fire({
+        icon: "success",
+        title: "Logged out",
+        text: "You have been logged out successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+
+      setTimeout(() => {
+        router.push(API_ROUTES.AUTH.LOGIN);
+      }, 1200);
+    }
   };
 
   return (

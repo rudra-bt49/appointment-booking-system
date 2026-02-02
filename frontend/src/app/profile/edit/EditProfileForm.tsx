@@ -30,7 +30,6 @@ export default function EditProfileForm({
 
     onSubmit: async (values, { resetForm }) => {
       try {
-        /** 🔑 Transform form values → API payload */
         const payload: EditProfileApiRequest = {
           fullName: values.fullName,
           email: values.email,
@@ -153,8 +152,8 @@ export default function EditProfileForm({
 
         <button
           type="submit"
-          disabled={formik.isSubmitting}
-          className="w-full rounded-lg bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-60"
+          disabled={!formik.dirty || formik.isSubmitting}
+          className="w-full rounded-lg bg-blue-600 py-2 text-white font-medium hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {formik.isSubmitting ? "Saving..." : "Save Changes"}
         </button>
