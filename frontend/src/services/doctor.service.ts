@@ -44,7 +44,6 @@ export const getDoctorById = async (
       },
     }
   );
-  console.log("Doctor by ID response:", res.data);
-
+  console.log("Doctor data:", res.data.data.doctorProfileId);
   return res.data;
 };

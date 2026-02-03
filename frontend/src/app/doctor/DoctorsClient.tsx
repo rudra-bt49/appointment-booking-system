@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import { IDoctor } from "@/types/doctor.types";
 import DoctorCard from "@/components/Doctor/DoctorCard";
-
+import BackButton from "@/components/common/BackButton";
 export default function DoctorsClient({
   doctors,
 }: {
@@ -12,6 +11,7 @@ export default function DoctorsClient({
   return (
     <div className="min-h-screen bg-slate-50/50">
       <div className="mx-auto max-w-[2160px] px-4 py-8 sm:px-6 lg:px-12">
+        <BackButton/>
         <header className="mb-10 flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Available Doctors

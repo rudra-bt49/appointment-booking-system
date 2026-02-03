@@ -5,15 +5,15 @@ import { doctorOnlyMiddleware } from "../middlewares/doctor.middleware";
 
 const router = Router();
 
-router.use(authMiddleware, doctorOnlyMiddleware);
+router.use(authMiddleware);
 
 router.post(
-  "/availability",
+  "/availability", doctorOnlyMiddleware,
   availabilityController.createAvailability
 );
 
 router.post(
-  "/availability/:availabilityId/slots",
+  "/availability/:availabilityId/slots", doctorOnlyMiddleware,
   availabilityController.createTimeSlots
 );
 
@@ -23,7 +23,7 @@ router.get(
 );
 
 router.delete(
-  "/slots/:slotId",
+  "/slots/:slotId", doctorOnlyMiddleware,
   availabilityController.deleteTimeSlot
 );
 

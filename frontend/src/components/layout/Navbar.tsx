@@ -29,6 +29,9 @@ export default function Navbar() {
       localStorage.removeItem("doctorProfileId");
       localStorage.removeItem("doctorAvailabilityId");
       localStorage.removeItem("doctorSlotIds");
+      localStorage.removeItem("selectedDate");
+      localStorage.removeItem("doctorProfileId");
+      localStorage.removeItem("appointmentDate");
 
       Swal.fire({
         icon: "success",

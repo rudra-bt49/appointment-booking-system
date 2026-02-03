@@ -49,6 +49,7 @@ export default function Sidebar() {
     localStorage.removeItem("doctorProfileId");
     localStorage.removeItem("doctorAvailabilityId");
     localStorage.removeItem("doctorSlotIds");
+    localStorage.removeItem("selectedDate");
 
     router.push(API_ROUTES.AUTH.LOGIN);
   };

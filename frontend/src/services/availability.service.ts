@@ -107,7 +107,7 @@ export const availabilityService = {
   ): Promise<IGetSlotsByDateResponse> {
     // 🔥 Fetch doctorId dynamically
     let doctorId = typeof window !== "undefined" ? localStorage.getItem("doctorProfileId") : null;
-
+    console.log("Using doctorId:", doctorId);
     if (!doctorId) {
       doctorId = String(await this.getMyDoctorProfileId());
     }

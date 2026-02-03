@@ -29,10 +29,10 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/auth/register"
+              href="/patientAppointments"
               className="rounded-lg border border-blue-600 px-6 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition"
             >
-              Get Started
+              My Appointments
             </Link>
           </div>
         </div>

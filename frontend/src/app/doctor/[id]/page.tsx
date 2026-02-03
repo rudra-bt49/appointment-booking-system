@@ -5,6 +5,8 @@ import {
   FaEnvelope,
   FaPhoneAlt,
 } from "react-icons/fa";
+import Link from "next/link";
+import BackButton from "@/components/common/BackButton";
 
 interface DoctorProfilePageProps {
   params: Promise<{ id: string }>;
@@ -14,18 +16,18 @@ export default async function DoctorProfilePage({
   params,
 }: DoctorProfilePageProps) {
   const { id } = await params;
-
   const res = await getDoctorById(id);
   const doctor = res.data;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
-      {/* Decorative Header Background */}
       <div className="h-48 w-full bg-gradient-to-r from-blue-600 to-indigo-700" />
 
       <div className="mx-auto -mt-24 max-w-3xl px-4">
+        {/* ✅ Back Button */}
+        <BackButton />
+
         <header className="mb-6 flex flex-col items-center text-center sm:items-start sm:text-left">
-          {/* Avatar Placeholder */}
           <div className="mb-4 flex h-32 w-32 items-center justify-center rounded-2xl bg-white p-2 shadow-xl ring-4 ring-white">
             <div className="flex h-full w-full items-center justify-center rounded-xl bg-blue-50 text-4xl font-bold text-blue-600">
               {doctor.fullName.charAt(0)}
@@ -43,10 +45,8 @@ export default async function DoctorProfilePage({
         </header>
 
         <div className="grid gap-6">
-          {/* Main Info Card */}
           <div className="overflow-hidden rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200/60 transition-all hover:shadow-md">
             <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2">
-              {/* Experience */}
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
                   <FaBriefcaseMedical size={18} />
@@ -61,7 +61,6 @@ export default async function DoctorProfilePage({
                 </div>
               </div>
 
-              {/* Fees */}
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
                   <FaMoneyBillWave size={18} />
@@ -76,7 +75,6 @@ export default async function DoctorProfilePage({
                 </div>
               </div>
 
-              {/* Email */}
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-600">
                   <FaEnvelope size={16} />
@@ -91,7 +89,6 @@ export default async function DoctorProfilePage({
                 </div>
               </div>
 
-              {/* Phone */}
               {doctor.phone && (
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-600">
@@ -121,11 +118,13 @@ export default async function DoctorProfilePage({
             )}
           </div>
 
-          {/* Book Appointment Button */}
-          <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]">
+          <Link
+            href={`/requestAppointment?doctorUserId=${id}`}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]"
+          >
             Book Appointment
             <span className="text-xl">→</span>
-          </button>
+          </Link>
         </div>
       </div>
     </div>
