@@ -10,6 +10,7 @@ export interface IDoctor {
   bio?: string | null;
   fees: number;
   isAvailable: boolean;
+  doctorProfileId?: number;
 }
 
 export interface GetDoctorsResponse {

@@ -3,7 +3,8 @@
 import React from "react";
 import { IDoctor } from "@/types/doctor.types";
 import Link from "next/link";
-
+import ExperienceIcon from "@/components/ui/ExperienceIcon";
+import FeeIcon from "@/components/ui/FeeIcon";
 
 export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
   return (
@@ -49,21 +50,7 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
         <div className="mt-6 space-y-3">
           <div className="flex items-center gap-3 text-sm text-slate-600">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2v20" />
-                <path d="m18 8-6-6-6 6" />
-                <path d="M21 12H3" />
-              </svg>
+              <ExperienceIcon />
             </div>
             <span>
               <span className="font-semibold text-slate-900">
@@ -75,21 +62,7 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
 
           <div className="flex items-center gap-3 text-sm text-slate-600">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                <path d="M12 18V6" />
-              </svg>
+              <FeeIcon />
             </div>
             <span>
               Consultation Fee:{" "}
@@ -112,10 +85,9 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
 
       <Link href={`/doctor/${doctor.id}`}>
         <button className="mt-6 w-full rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-600 active:scale-95">
-            View Profile
+          View Profile
         </button>
       </Link>
-
     </div>
   );
 }

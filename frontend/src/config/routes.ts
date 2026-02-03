@@ -4,6 +4,7 @@ const API_ROUTES = {
     GET_ME_ID: "/doctors/me/id",
     GET_ALL: "/doctors",
     GET_BY_ID: "/doctors/:id",
+    GET_BY_DOCTOR_PROFILE_ID: "/doctors/doctorprofile/:id",
   },
   AVAILABILITY: {
     CREATE: "/doctor/availability",
@@ -11,6 +12,9 @@ const API_ROUTES = {
     GET_MY: "/doctor/availability",
     DELETE_SLOT: "/doctor/slots/:slotId",
     GET_SLOTS_BY_DATE: "/doctor/availability/slots/by-date",
+  },
+  APPOINTMENT: {
+    REQUEST: "/appointments/request",
   },
   PROFILE: "/profile",
   PROFILES: {

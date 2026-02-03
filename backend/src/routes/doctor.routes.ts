@@ -14,5 +14,4 @@ router.get("/me/id", authMiddleware, getLoggedInDoctorProfileId);
 router.get("/", authMiddleware, getAllDoctors);
 router.get("/:id", authMiddleware, getDoctorById);
 
-
 export default router;

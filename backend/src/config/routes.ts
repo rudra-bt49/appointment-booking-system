@@ -17,6 +17,11 @@ const ROUTES = {
   DOCTOR_AVAILABILITY: {
     BASE: "/doctor",
   },
+  APPOINTMENT: {
+    REQUEST: "/request",
+    MY_APPOINTMENTS: "/my",
+    UPLOAD_REPORT: "/:id/upload-report",
+  },
 };
 
 export default ROUTES;

@@ -59,6 +59,7 @@ export const doctorService = {
         avatarUrl: true,
         doctorProfile: {
           select: {
+            id: true,
             specialization: true,
             experience: true,
             bio: true,
@@ -79,7 +80,7 @@ export const doctorService = {
       email: doctor.email,
       phone: doctor.phone,
       avatarUrl: doctor.avatarUrl,
-
+      doctorProfileId: doctor.doctorProfile.id,
       specialization: doctor.doctorProfile.specialization,
       experience: doctor.doctorProfile.experience,
       bio: doctor.doctorProfile.bio,
@@ -96,7 +97,7 @@ export const doctorService = {
     });
 
     return doctorProfile?.id ?? null;
-  },
+  }
 };
 
 

@@ -6,6 +6,7 @@ import { ProfileResponse, EditProfileApiRequest } from "@/types/profile.types";
 import { editProfileClient } from "@/services/profile.client.service";
 import { profileValidationSchema } from "@/validations/profile.validation";
 import API_ROUTES from "@/config/routes";
+import BackButton from "@/components/common/BackButton";
 
 export default function EditProfileForm({
   profile,
@@ -67,8 +68,9 @@ export default function EditProfileForm({
         onSubmit={formik.handleSubmit}
         className="w-full max-w-2xl space-y-6 bg-white p-8 rounded-xl shadow"
       >
+        <BackButton/>
         <h1 className="text-2xl font-bold text-center">Edit Profile</h1>
-
+        
         {/* Full Name */}
         <div>
           <label className="block font-medium mb-1">Full Name</label>

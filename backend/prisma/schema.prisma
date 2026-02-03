@@ -121,6 +121,7 @@ model Appointment {
 
   status    AppointmentStatus @default(REQUESTED)
   notes     String?
+  reportUrl String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
