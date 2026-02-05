@@ -70,3 +70,23 @@ export const getMyAppointments = async (
     next(error);
   }
 };
+
+export const getDoctorAppointments = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user!.userId;
+
+    const appointments =
+      await appointmentService.getAppointmentsByDoctorUserId(userId);
+
+    return successResponse(
+      res,
+      "Doctor appointments fetched successfully",
+      appointments
+    );
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};

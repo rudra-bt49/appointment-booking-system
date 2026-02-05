@@ -25,3 +25,21 @@ export interface PatientAppointmentResponse {
     endTime: Date;
   };
 }
+
+export interface DoctorAppointmentResponse {
+  id: number;
+  status: AppointmentStatus;
+  notes: string | null;
+  reportUrl: string | null;
+
+  patient: {
+    fullName: string;
+    phone: string | null;
+  };
+
+  schedule: {
+    date: Date;
+    startTime: Date;
+    endTime: Date;
+  };
+}

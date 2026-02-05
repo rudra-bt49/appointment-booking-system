@@ -15,6 +15,7 @@ const API_ROUTES = {
   },
   APPOINTMENT: {
     REQUEST: "/appointments/request",
+    BY_DOCTOR: "/appointments/by-doctor",
   },
   PROFILE: "/profile",
   PROFILES: {

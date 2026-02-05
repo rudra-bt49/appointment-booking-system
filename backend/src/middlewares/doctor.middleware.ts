@@ -8,6 +8,7 @@ export const doctorOnlyMiddleware = (
   next: NextFunction
 ) => {
   if (!req.user || req.user.role !== "DOCTOR") {
+    console.log("id: ", req.user?.userId);
     return errorResponse(res, "Only doctors are allowed", 403);
   }
   next();

@@ -88,3 +88,24 @@ export const getMyAppointmentsServer = async (
 
   return res.json();
 };
+
+export const getDoctorAppointmentsServer = async (
+  cookieHeader: string
+) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/appointments/by-doctor`,
+    {
+      method: "GET",
+      headers: {
+        Cookie: cookieHeader,
+      },
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch doctor appointments");
+  }
+
+  return res.json();
+};
