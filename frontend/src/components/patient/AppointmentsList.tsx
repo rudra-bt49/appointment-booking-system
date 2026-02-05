@@ -109,7 +109,7 @@ export default function AppointmentsList({
                       Date
                     </p>
                     <p className="text-sm font-semibold text-gray-900">
-                      {appointment.schedule.date}
+                      {appointment.schedule.date.slice(0,10)}
                     </p>
                   </div>
                 </div>

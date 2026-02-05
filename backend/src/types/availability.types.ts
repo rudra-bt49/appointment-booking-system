@@ -1,7 +1,11 @@
+// export interface CreateAvailabilityPayload {
+//   date: string; 
+// }
 export interface CreateAvailabilityPayload {
-  date: string; 
+  date: string;            // YYYY-MM-DD
+  startDuration: string;   // HH:mm:ss
+  endDuration: string;     // HH:mm:ss
 }
-
 export interface TimeSlotInput {
   startTime: string; 
   endTime: string;   
@@ -10,6 +14,11 @@ export interface TimeSlotInput {
 export interface CreateTimeSlotsPayload {
   slots: TimeSlotInput[];
 }
+
+// export interface GetSlotsByDatePayload {
+//   doctorId: number;
+//   date: string;
+// }
 
 export interface GetSlotsByDatePayload {
   doctorId: number;

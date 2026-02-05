@@ -1,249 +1,623 @@
-"use client";
+// "use client";
 
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
+// import { availabilityService } from "@/services/availability.service";
+// import { ITimeSlot } from "@/types/availability.types";
+
+// export default function AvailabilityPage() {
+//   const [selectedDate, setSelectedDate] = useState<string>(() =>
+//     new Date().toISOString().split("T")[0]
+//   );
+//   const [slots, setSlots] = useState<ITimeSlot[]>([]);
+//   const [loading, setLoading] = useState(false);
+//   const [showCreate, setShowCreate] = useState(false);
+//   const [newSlots, setNewSlots] = useState<ITimeSlot[]>([
+//     { startTime: "", endTime: "" },
+//   ]);
+
+//   const fetchSlots = async (date: string) => {
+//     try {
+//       setLoading(true);
+//       localStorage.removeItem("doctorAvailabilityId");
+
+//       const res = await availabilityService.getSlotsByDoctorAndDate(date);
+
+//       if (res.data.availabilityId) {
+//         localStorage.setItem(
+//           "doctorAvailabilityId",
+//           String(res.data.availabilityId)
+//         );
+//       }
+
+//       setSlots(res.data.slots);
+//     } catch {
+//       setSlots([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchSlots(selectedDate);
+//   }, [selectedDate]);
+
+//   const handleDelete = async (slotId?: number) => {
+//     if (!slotId) return;
+//     await availabilityService.deleteTimeSlot(slotId);
+//     fetchSlots(selectedDate);
+//   };
+
+//   const addRow = () => {
+//     setNewSlots([...newSlots, { startTime: "", endTime: "" }]);
+//   };
+
+//   const removeRow = (index: number) => {
+//     setNewSlots(newSlots.filter((_, i) => i !== index));
+//   };
+
+//   const updateRow = (
+//     index: number,
+//     key: "startTime" | "endTime",
+//     value: string
+//   ) => {
+//     const copy = [...newSlots];
+
+//     if (key === "startTime") {
+//       copy[index].startTime = value;
+
+//       if (value) {
+//         const [h, m] = value.split(":").map(Number);
+//         const date = new Date();
+//         date.setHours(h);
+//         date.setMinutes(m + 30);
+//         date.setSeconds(0);
+
+//         const endH = String(date.getHours()).padStart(2, "0");
+//         const endM = String(date.getMinutes()).padStart(2, "0");
+
+//         copy[index].endTime = `${endH}:${endM}`;
+//       } else {
+//         copy[index].endTime = "";
+//       }
+//     } else {
+//       copy[index][key] = value;
+//     }
+
+//     setNewSlots(copy);
+//   };
+
+//   const handleCreateSlots = async () => {
+//     if (!localStorage.getItem("doctorAvailabilityId")) {
+//       await availabilityService.createAvailability({ date: selectedDate });
+//     }
+
+//     await availabilityService.createTimeSlots({ slots: newSlots });
+
+//     setShowCreate(false);
+//     setNewSlots([{ startTime: "", endTime: "" }]);
+//     fetchSlots(selectedDate);
+//   };
+
+//   const formatTime = (iso: string) => iso.slice(11, 16);
+
+//   return (
+//     <div className="mx-auto max-w-5xl p-4 sm:p-6">
+//       <h1 className="mb-8 text-3xl font-semibold text-gray-900">
+//         Doctor Availability
+//       </h1>
+
+//       {/* Date Picker */}
+//       <div className="mb-8">
+//         <label className="mb-2 block text-sm font-medium text-gray-700">
+//           Select Date
+//         </label>
+//         <input
+//           type="date"
+//           value={selectedDate}
+//           min={new Date().toISOString().split("T")[0]}
+//           onChange={(e) => setSelectedDate(e.target.value)}
+//           className="w-full max-w-sm rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+//         />
+//       </div>
+
+//       {/* Time Slots */}
+//       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
+//         <div className="mb-5 flex items-center justify-between">
+//           <h2 className="text-xl font-semibold text-gray-800">
+//             Time Slots
+//           </h2>
+//           <button
+//             onClick={() => setShowCreate(true)}
+//             className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+//           >
+//             Create Slots
+//           </button>
+//         </div>
+
+//         {loading && (
+//           <p className="text-sm text-gray-500">Loading slots…</p>
+//         )}
+
+//         {!loading && slots.length === 0 && (
+//           <p className="text-sm text-gray-500">
+//             No slots available for this date.
+//           </p>
+//         )}
+
+//         <div className="space-y-4">
+//           {slots.map((slot) => (
+//             <div
+//               key={slot.id}
+//               className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-5 py-4"
+//             >
+//               <span className="text-base font-semibold text-gray-800">
+//                 {formatTime(slot.startTime)} → {formatTime(slot.endTime)}
+//               </span>
+//               <button
+//                 onClick={() => handleDelete(slot.id)}
+//                 className="text-sm font-medium text-red-600 hover:text-red-700"
+//               >
+//                 Delete
+//               </button>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+
+//       {/* CREATE SLOTS MODAL */}
+//       {showCreate && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+//           <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+//             <h3 className="mb-6 text-lg font-semibold text-gray-900">
+//               Create Slots
+//             </h3>
+
+//             <div className="space-y-6">
+//               {newSlots.map((slot, i) => (
+//                 <div
+//                   key={i}
+//                   className="rounded-xl border border-gray-200 p-4"
+//                 >
+//                   <div className="grid grid-cols-2 gap-4">
+//                     <div>
+//                       <label className="mb-1 block text-xs font-medium text-gray-600">
+//                         Start Time
+//                       </label>
+//                       <input
+//                         type="time"
+//                         value={slot.startTime}
+//                         onChange={(e) =>
+//                           updateRow(i, "startTime", e.target.value)
+//                         }
+//                         className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+//                       />
+//                     </div>
+
+//                     <div>
+//                       <label className="mb-1 block text-xs font-medium text-gray-600">
+//                         End Time (Auto 30 mins)
+//                       </label>
+//                       <input
+//                         type="time"
+//                         value={slot.endTime}
+//                         readOnly
+//                         className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-100 p-2 text-sm"
+//                       />
+//                     </div>
+//                   </div>
+
+//                   {newSlots.length > 1 && (
+//                     <div className="mt-3 text-right">
+//                       <button
+//                         onClick={() => removeRow(i)}
+//                         className="text-sm font-medium text-red-600 hover:underline"
+//                       >
+//                         Remove slot
+//                       </button>
+//                     </div>
+//                   )}
+//                 </div>
+//               ))}
+//             </div>
+
+//             <button
+//               onClick={addRow}
+//               className="mt-4 text-sm font-medium text-blue-600 hover:underline"
+//             >
+//               + Add another slot
+//             </button>
+
+//             <div className="mt-6 flex justify-end gap-3">
+//               <button
+//                 onClick={() => setShowCreate(false)}
+//                 className="rounded-lg border px-4 py-2 text-sm"
+//               >
+//                 Cancel
+//               </button>
+//               <button
+//                 onClick={handleCreateSlots}
+//                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+//               >
+//                 Save
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+"use client";
+import { useEffect, useState, useRef } from "react";
+import { Calendar, Clock, Plus, Trash2, X, AlertCircle } from "lucide-react";
+import DoctorCalendar from "@/components/DoctorCalendar";
 import { availabilityService } from "@/services/availability.service";
+import { getLoggedInDoctorProfileId } from "@/services/doctorIdentity.service";
 import { ITimeSlot } from "@/types/availability.types";
 
 export default function AvailabilityPage() {
-  const [selectedDate, setSelectedDate] = useState<string>(() =>
+  const [doctorId, setDoctorId] = useState<number | null>(null);
+  const [date, setDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [slots, setSlots] = useState<ITimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [newSlots, setNewSlots] = useState<ITimeSlot[]>([
-    { startTime: "", endTime: "" },
-  ]);
+  const [startDuration, setStartDuration] = useState("");
+  const [endDuration, setEndDuration] = useState("");
+  const [validationError, setValidationError] = useState("");
+  
+  const createSectionRef = useRef<HTMLDivElement>(null);
 
-  const fetchSlots = async (date: string) => {
-    try {
-      setLoading(true);
-      localStorage.removeItem("doctorAvailabilityId");
-
-      const res = await availabilityService.getSlotsByDoctorAndDate(date);
-
-      if (res.data.availabilityId) {
-        localStorage.setItem(
-          "doctorAvailabilityId",
-          String(res.data.availabilityId)
-        );
-      }
-
-      setSlots(res.data.slots);
-    } catch {
-      setSlots([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Resolve doctorId once
   useEffect(() => {
-    fetchSlots(selectedDate);
-  }, [selectedDate]);
+    getLoggedInDoctorProfileId()
+      .then(setDoctorId)
+      .catch(() => setDoctorId(null));
+  }, []);
 
-  const handleDelete = async (slotId?: number) => {
-    if (!slotId) return;
-    await availabilityService.deleteTimeSlot(slotId);
-    fetchSlots(selectedDate);
-  };
+  // Fetch slots on date change
+  useEffect(() => {
+    if (!doctorId) return;
+    console.log(doctorId);
+    availabilityService
+      .getSlotsByDoctorAndDate(doctorId, date)
+      .then((res) => {
+        setSlots(res?.data?.slots ?? []);
+      })
+      .catch(() => {
+        setSlots([]);
+      })
+      .finally(() => setLoading(false));
+  }, [doctorId, date]);
 
-  const addRow = () => {
-    setNewSlots([...newSlots, { startTime: "", endTime: "" }]);
-  };
-
-  const removeRow = (index: number) => {
-    setNewSlots(newSlots.filter((_, i) => i !== index));
-  };
-
-  const updateRow = (
-    index: number,
-    key: "startTime" | "endTime",
-    value: string
-  ) => {
-    const copy = [...newSlots];
-
-    if (key === "startTime") {
-      copy[index].startTime = value;
-
-      if (value) {
-        const [h, m] = value.split(":").map(Number);
-        const date = new Date();
-        date.setHours(h);
-        date.setMinutes(m + 30);
-        date.setSeconds(0);
-
-        const endH = String(date.getHours()).padStart(2, "0");
-        const endM = String(date.getMinutes()).padStart(2, "0");
-
-        copy[index].endTime = `${endH}:${endM}`;
-      } else {
-        copy[index].endTime = "";
-      }
-    } else {
-      copy[index][key] = value;
+  const validateTimeSlots = (start: string, end: string): string => {
+    if (!start || !end) {
+      return "Please select both start and end times";
     }
 
-    setNewSlots(copy);
-  };
+    const [startHour, startMin] = start.split(":").map(Number);
+    const [endHour, endMin] = end.split(":").map(Number);
 
-  const handleCreateSlots = async () => {
-    if (!localStorage.getItem("doctorAvailabilityId")) {
-      await availabilityService.createAvailability({ date: selectedDate });
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const durationMinutes = endMinutes - startMinutes;
+
+    if (durationMinutes <= 0) {
+      return "End time must be after start time";
     }
 
-    await availabilityService.createTimeSlots({ slots: newSlots });
+    if (durationMinutes < 60) {
+      return "Minimum slot duration is 1 hour";
+    }
 
+    if (durationMinutes > 720) {
+      return "Maximum slot duration is 12 hours";
+    }
+
+    return "";
+  };
+
+  const generateSlots = async () => {
+    if (!doctorId) return;
+
+    const error = validateTimeSlots(startDuration, endDuration);
+    if (error) {
+      setValidationError(error);
+      return;
+    }
+
+    setValidationError("");
+    await availabilityService.createAvailability({
+      date,
+      startDuration,
+      endDuration,
+    });
+    const res = await availabilityService.getSlotsByDoctorAndDate(
+      doctorId,
+      date
+    );
+    setSlots(res?.data?.slots ?? []);
     setShowCreate(false);
-    setNewSlots([{ startTime: "", endTime: "" }]);
-    fetchSlots(selectedDate);
+    setStartDuration("");
+    setEndDuration("");
   };
 
-  const formatTime = (iso: string) => iso.slice(11, 16);
+  const deleteSlot = async (slotId: number) => {
+    await availabilityService.deleteTimeSlot(slotId);
+    setSlots((prev) => prev.filter((s) => s.id !== slotId));
+  };
+
+  const handleShowCreate = () => {
+    setShowCreate(true);
+    setTimeout(() => {
+      createSectionRef.current?.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "start" 
+      });
+    }, 100);
+  };
+
+  const handleCancelCreate = () => {
+    setShowCreate(false);
+    setStartDuration("");
+    setEndDuration("");
+    setValidationError("");
+  };
+
+  const formatTime = (iso: string) => {
+    const time = iso.slice(11, 16);
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours);
+    const period = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${displayHour}:${minutes} ${period}`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
-    <div className="mx-auto max-w-5xl p-4 sm:p-6">
-      <h1 className="mb-8 text-3xl font-semibold text-gray-900">
-        Doctor Availability
-      </h1>
-
-      {/* Date Picker */}
-      <div className="mb-8">
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Select Date
-        </label>
-        <input
-          type="date"
-          value={selectedDate}
-          min={new Date().toISOString().split("T")[0]}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="w-full max-w-sm rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-        />
-      </div>
-
-      {/* Time Slots */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Time Slots
-          </h2>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Create Slots
-          </button>
-        </div>
-
-        {loading && (
-          <p className="text-sm text-gray-500">Loading slots…</p>
-        )}
-
-        {!loading && slots.length === 0 && (
-          <p className="text-sm text-gray-500">
-            No slots available for this date.
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Calendar className="w-8 h-8 text-blue-600" />
+            Availability Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage your consultation time slots
           </p>
-        )}
-
-        <div className="space-y-4">
-          {slots.map((slot) => (
-            <div
-              key={slot.id}
-              className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-5 py-4"
-            >
-              <span className="text-base font-semibold text-gray-800">
-                {formatTime(slot.startTime)} → {formatTime(slot.endTime)}
-              </span>
-              <button
-                onClick={() => handleDelete(slot.id)}
-                className="text-sm font-medium text-red-600 hover:text-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
         </div>
-      </div>
 
-      {/* CREATE SLOTS MODAL */}
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="mb-6 text-lg font-semibold text-gray-900">
-              Create Slots
-            </h3>
+        {/* Calendar Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              Select Date
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {formatDate(date)}
+            </p>
+          </div>
+          <DoctorCalendar value={date} onChange={setDate} />
+        </div>
 
-            <div className="space-y-6">
-              {newSlots.map((slot, i) => (
+        {/* Time Slots Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-600" />
+                Available Time Slots
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {slots.length} slot{slots.length !== 1 ? "s" : ""} available
+              </p>
+            </div>
+            {!showCreate && (
+              <button
+                onClick={handleShowCreate}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+              >
+                <Plus className="w-5 h-5" />
+                Create Slots
+              </button>
+            )}
+          </div>
+
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+
+          {!loading && slots.length === 0 && (
+            <div className="text-center py-12">
+              <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">
+                No slots available for this date
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                {`Click "Create Slots" to add availability`}
+              </p>
+            </div>
+          )}
+
+          {!loading && slots.length > 0 && (
+            <div className="grid gap-3">
+              {slots.map((slot) => (
                 <div
-                  key={i}
-                  className="rounded-xl border border-gray-200 p-4"
+                  key={slot.id}
+                  className="flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl px-5 py-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-600">
-                        Start Time
-                      </label>
-                      <input
-                        type="time"
-                        value={slot.startTime}
-                        onChange={(e) =>
-                          updateRow(i, "startTime", e.target.value)
-                        }
-                        className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
-                      />
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-600 rounded-lg p-2">
+                      <Clock className="w-5 h-5 text-white" />
                     </div>
-
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-600">
-                        End Time (Auto 30 mins)
-                      </label>
-                      <input
-                        type="time"
-                        value={slot.endTime}
-                        readOnly
-                        className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-100 p-2 text-sm"
-                      />
+                      <p className="font-semibold text-gray-800">
+                        {formatTime(slot.startTime)} → {formatTime(slot.endTime)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {slot.isAvailable ? "Available for booking" : "Slot booked"}
+                      </p>
                     </div>
                   </div>
-
-                  {newSlots.length > 1 && (
-                    <div className="mt-3 text-right">
+                  {slot.isAvailable ? (
+                    <button
+                      onClick={() => deleteSlot(slot.id)}
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors font-medium"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  ) : (
+                    <div className="flex flex-col items-end">
                       <button
-                        onClick={() => removeRow(i)}
-                        className="text-sm font-medium text-red-600 hover:underline"
+                        disabled
+                        className="flex items-center gap-2 text-gray-400 bg-gray-100 px-4 py-2 rounded-lg font-medium cursor-not-allowed"
                       >
-                        Remove slot
+                        <Trash2 className="w-4 h-4" />
+                        Delete
                       </button>
+                      <p className="text-xs text-gray-500 mt-1">Slot booked</p>
                     </div>
                   )}
                 </div>
               ))}
             </div>
+          )}
+        </div>
 
-            <button
-              onClick={addRow}
-              className="mt-4 text-sm font-medium text-blue-600 hover:underline"
-            >
-              + Add another slot
-            </button>
-
-            <div className="mt-6 flex justify-end gap-3">
+        {/* Create Slots Card */}
+        {showCreate && (
+          <div 
+            ref={createSectionRef}
+            className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Plus className="w-5 h-5 text-green-600" />
+                  Create Availability Slots
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Define your working hours for {formatDate(date)}
+                </p>
+              </div>
               <button
-                onClick={() => setShowCreate(false)}
-                className="rounded-lg border px-4 py-2 text-sm"
+                onClick={handleCancelCreate}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium"
               >
+                <X className="w-4 h-4" />
                 Cancel
               </button>
-              <button
-                onClick={handleCreateSlots}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                Save
-              </button>
             </div>
+
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Time
+                </label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    value={startDuration}
+                    onChange={(e) => {
+                      setStartDuration(e.target.value);
+                      setValidationError("");
+                    }}
+                    placeholder="e.g., 09:00 AM"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700"
+                  />
+                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Select your starting time (e.g., 09:00 AM)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time
+                </label>
+                <div className="relative">
+                  <input
+                    type="time"
+                    value={endDuration}
+                    onChange={(e) => {
+                      setEndDuration(e.target.value);
+                      setValidationError("");
+                    }}
+                    placeholder="e.g., 05:00 PM"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700"
+                  />
+                  <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Select your ending time (e.g., 05:00 PM)
+                </p>
+              </div>
+            </div>
+
+            {validationError && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-800">
+                    Validation Error
+                  </p>
+                  <p className="text-sm text-red-700 mt-1">
+                    {validationError}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Requirements:</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <li>Minimum slot duration: 1 hour</li>
+                    <li>Maximum slot duration: 12 hours</li>
+                    <li>End time must be after start time</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={generateSlots}
+              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3.5 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              Generate Slots
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

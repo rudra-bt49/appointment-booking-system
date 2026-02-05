@@ -1,7 +1,9 @@
 import prisma from "../config/prisma";
 import { CreateAppointmentRequest } from "../types/appointment.types";
-import { AppointmentStatus } from "@prisma/client";
+import { AppointmentStatus, Prisma } from "@prisma/client";
 import { PatientAppointmentResponse } from "../types/appointment.types";
+import { DoctorAppointmentResponse } from "../types/appointment.types";
+
 
 export const appointmentService = {
   async createAppointment(
@@ -33,38 +35,61 @@ export const appointmentService = {
       throw new Error("Time slot not found");
     }
 
-    if (timeSlot.appointment?.status == AppointmentStatus.APPROVED) {
-      throw new Error("Time slot already has an appointment");
+    // ✅ Slot availability check
+    if (!timeSlot.isAvailable) {
+      throw new Error("Already requested appointment");
     }
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        doctorId: payload.doctorId,
-        patientId: patient.id,
-        timeSlotId: payload.timeSlotId,
-        notes: payload.notes,
-        reportUrl: payload.reportUrl ?? null,
-        status: "REQUESTED",
-      },
-      include: {
-        doctor: {
+    try {
+      // ✅ Transaction: create appointment + block slot
+      const result = await prisma.$transaction(async (tx) => {
+        const appointment = await tx.appointment.create({
+          data: {
+            doctorId: payload.doctorId,
+            patientId: patient.id,
+            timeSlotId: payload.timeSlotId,
+            notes: payload.notes,
+            reportUrl: payload.reportUrl ?? null,
+            status: AppointmentStatus.REQUESTED,
+          },
           include: {
-            user: {
-              select: {
-                fullName: true,
-                email: true,
+            doctor: {
+              include: {
+                user: {
+                  select: {
+                    fullName: true,
+                    email: true,
+                  },
+                },
               },
             },
+            timeSlot: true,
           },
-        },
-        timeSlot: true,
-      },
-    });
+        });
 
-    return appointment;
+        await tx.timeSlot.update({
+          where: { id: payload.timeSlotId },
+          data: {
+            isAvailable: false,
+          },
+        });
+
+        return appointment;
+      });
+
+      return result;
+    } catch (error: any) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new Error("Already requested appointment");
+      }
+
+      throw error;
+    }
   },
 
-  //get appointments of patient
   async getAppointmentsByPatientUserId(
     userId: number
   ): Promise<PatientAppointmentResponse[]> {
@@ -120,5 +145,64 @@ export const appointmentService = {
       },
     }));
   },
-};
 
+  async getAppointmentsByDoctorUserId(
+    userId: number
+  ): Promise<DoctorAppointmentResponse[]> {
+    const doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!doctorProfile) {
+      throw new Error("Doctor profile not found");
+    }
+
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctorProfile.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        patient: {
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        timeSlot: {
+          include: {
+            availability: {
+              select: {
+                date: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return appointments.map((appointment) => ({
+      id: appointment.id,
+      status: appointment.status,
+      notes: appointment.notes,
+      reportUrl: appointment.reportUrl,
+
+      patient: {
+        fullName: appointment.patient.user.fullName,
+        phone: appointment.patient.user.phone,
+      },
+
+      schedule: {
+        date: appointment.timeSlot.availability.date,
+        startTime: appointment.timeSlot.startTime,
+        endTime: appointment.timeSlot.endTime,
+      },
+    }));
+  },
+};

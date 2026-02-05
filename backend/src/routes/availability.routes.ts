@@ -12,10 +12,10 @@ router.post(
   availabilityController.createAvailability
 );
 
-router.post(
-  "/availability/:availabilityId/slots", doctorOnlyMiddleware,
-  availabilityController.createTimeSlots
-);
+// router.post(
+//   "/availability/:availabilityId/slots", doctorOnlyMiddleware,
+//   availabilityController.createTimeSlots
+// );
 
 router.get(
   "/availability",

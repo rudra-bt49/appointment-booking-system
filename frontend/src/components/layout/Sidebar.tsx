@@ -22,7 +22,7 @@ const navItems = [
   },
   {
     label: "Appointments",
-    href: "/doctor/appointments",
+    href: "/doctorAppointments",
     icon: CalendarDays,
   },
   {
@@ -45,11 +45,6 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("user");
-    localStorage.removeItem("doctorProfileId");
-    localStorage.removeItem("doctorAvailabilityId");
-    localStorage.removeItem("doctorSlotIds");
-    localStorage.removeItem("selectedDate");
 
     router.push(API_ROUTES.AUTH.LOGIN);
   };
