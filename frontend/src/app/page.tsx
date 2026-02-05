@@ -20,7 +20,6 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex justify-center gap-4">
-            {/* ✅ Correct page navigation */}
             <Link
               href="/doctor"
               className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
