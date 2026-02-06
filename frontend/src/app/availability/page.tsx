@@ -4,7 +4,7 @@ import { Calendar, Clock, Plus, Trash2, X, AlertCircle } from "lucide-react";
 import DoctorCalendar from "@/components/DoctorCalendar";
 import { availabilityService } from "@/services/availability.service";
 import { getLoggedInDoctorProfileId } from "@/services/doctorIdentity.service";
-import { ITimeSlot } from "@/types/availability.types";
+import { ITimeSlot, IDoctorAvailability } from "@/types/availability.types";
 
 export default function AvailabilityPage() {
   const [doctorId, setDoctorId] = useState<number | null>(null);
@@ -17,54 +17,41 @@ export default function AvailabilityPage() {
   const [startDuration, setStartDuration] = useState("");
   const [endDuration, setEndDuration] = useState("");
   const [validationError, setValidationError] = useState("");
-  
+
   const createSectionRef = useRef<HTMLDivElement>(null);
 
-  // Resolve doctorId once
   useEffect(() => {
     getLoggedInDoctorProfileId()
       .then(setDoctorId)
       .catch(() => setDoctorId(null));
   }, []);
 
-  // Fetch slots on date change
   useEffect(() => {
     if (!doctorId) return;
-    console.log(doctorId);
     availabilityService
       .getSlotsByDoctorAndDate(doctorId, date)
       .then((res) => {
-        setSlots(res?.data?.slots ?? []);
+        const availabilities = res.data ?? [];
+        const allSlots = availabilities.flatMap(
+          (a: IDoctorAvailability) => a.timeSlots
+        );
+        setSlots(allSlots);
       })
-      .catch(() => {
-        setSlots([]);
-      })
+      .catch(() => setSlots([]))
       .finally(() => setLoading(false));
   }, [doctorId, date]);
 
   const validateTimeSlots = (start: string, end: string): string => {
-    if (!start || !end) {
-      return "Please select both start and end times";
-    }
+    if (!start || !end) return "Please select both start and end times";
 
-    const [startHour, startMin] = start.split(":").map(Number);
-    const [endHour, endMin] = end.split(":").map(Number);
+    const [sh, sm] = start.split(":").map(Number);
+    const [eh, em] = end.split(":").map(Number);
 
-    const startMinutes = startHour * 60 + startMin;
-    const endMinutes = endHour * 60 + endMin;
-    const durationMinutes = endMinutes - startMinutes;
+    const duration = eh * 60 + em - (sh * 60 + sm);
 
-    if (durationMinutes <= 0) {
-      return "End time must be after start time";
-    }
-
-    if (durationMinutes < 60) {
-      return "Minimum slot duration is 1 hour";
-    }
-
-    if (durationMinutes > 720) {
-      return "Maximum slot duration is 12 hours";
-    }
+    if (duration <= 0) return "End time must be after start time";
+    if (duration < 60) return "Minimum slot duration is 1 hour";
+    if (duration > 720) return "Maximum slot duration is 12 hours";
 
     return "";
   };
@@ -79,16 +66,21 @@ export default function AvailabilityPage() {
     }
 
     setValidationError("");
+
     await availabilityService.createAvailability({
       date,
       startDuration,
       endDuration,
     });
+
     const res = await availabilityService.getSlotsByDoctorAndDate(
       doctorId,
       date
     );
-    setSlots(res?.data?.slots ?? []);
+
+    const availabilities = res.data ?? [];
+    setSlots(availabilities.flatMap(a => a.timeSlots));
+
     setShowCreate(false);
     setStartDuration("");
     setEndDuration("");
@@ -96,7 +88,7 @@ export default function AvailabilityPage() {
 
   const deleteSlot = async (slotId: number) => {
     await availabilityService.deleteTimeSlot(slotId);
-    setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    setSlots(prev => prev.filter(s => s.id !== slotId));
   };
 
   const handleShowCreate = () => {

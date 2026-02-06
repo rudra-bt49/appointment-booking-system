@@ -6,7 +6,11 @@ import {
 import { GetDoctorByIdResponse } from "@/types/doctor.types";
 import { IGetSlotsByDateRequest } from "@/types/availability.types";
 import { IGetMyAppointmentsResponse } from "@/types/patientAppointment.types"
-
+import {
+  UpdateAppointmentStatusPayload,
+  UpdateAppointmentStatusResponse,
+} from "@/types/updateAppointmentStatus.types";
+  
 /* ----------------------------------------
    Get doctor by userId
 ----------------------------------------- */
@@ -108,4 +112,14 @@ export const getDoctorAppointmentsServer = async (
   }
 
   return res.json();
+};
+
+export const updateAppointmentStatus = async (
+  payload: UpdateAppointmentStatusPayload
+): Promise<UpdateAppointmentStatusResponse> => {
+  const res = await axiosInstance.patch<UpdateAppointmentStatusResponse>(
+    API_ROUTES.APPOINTMENT.UPDATE_STATUS,
+    payload
+  );
+  return res.data;
 };
