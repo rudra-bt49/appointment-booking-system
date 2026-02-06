@@ -1,17 +1,46 @@
 import prisma from "../config/prisma";
 import { CreateAppointmentRequest } from "../types/appointment.types";
-import { AppointmentStatus, Prisma } from "@prisma/client";
-import { PatientAppointmentResponse } from "../types/appointment.types";
-import { DoctorAppointmentResponse } from "../types/appointment.types";
+import { AppointmentStatus, PaymentStatus, Prisma } from "@prisma/client";
+import {
+  PatientAppointmentResponse,
+  DoctorAppointmentResponse,
+} from "../types/appointment.types";
 
+import { sendMail } from "../utils/smtp/sendMail";
+import {
+  approvedAppointmentTemplate,
+  rejectedAppointmentTemplate,
+  requestedAppointmentTemplate,
+} from "../utils/smtp/emailTemplates";
+
+/**
+ * ✅ FORMATTERS
+ * Force UTC so time is displayed EXACTLY as stored in DB
+ * (no IST / local timezone conversion)
+ */
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-IN", { timeZone: "UTC" });
+
+const formatTime = (date: Date) =>
+  date.toLocaleTimeString("en-IN", {
+    timeZone: "UTC",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
 export const appointmentService = {
-  async createAppointment(
-    userId: number,
-    payload: CreateAppointmentRequest
-  ) {
+  async createAppointment(userId: number, payload: CreateAppointmentRequest) {
     const patient = await prisma.patientProfile.findUnique({
       where: { userId },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!patient) {
@@ -20,6 +49,14 @@ export const appointmentService = {
 
     const doctor = await prisma.doctorProfile.findUnique({
       where: { id: payload.doctorId },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!doctor) {
@@ -28,20 +65,17 @@ export const appointmentService = {
 
     const timeSlot = await prisma.timeSlot.findUnique({
       where: { id: payload.timeSlotId },
-      include: { appointment: true },
     });
 
     if (!timeSlot) {
       throw new Error("Time slot not found");
     }
 
-    // ✅ Slot availability check
     if (!timeSlot.isAvailable) {
       throw new Error("Already requested appointment");
     }
 
     try {
-      // ✅ Transaction: create appointment + block slot
       const result = await prisma.$transaction(async (tx) => {
         const appointment = await tx.appointment.create({
           data: {
@@ -69,12 +103,23 @@ export const appointmentService = {
 
         await tx.timeSlot.update({
           where: { id: payload.timeSlotId },
-          data: {
-            isAvailable: false,
-          },
+          data: { isAvailable: false },
         });
 
         return appointment;
+      });
+
+      // ✅ EMAIL → DOCTOR (REQUESTED)
+      await sendMail({
+        to: doctor.user.email,
+        subject: "New Appointment Request",
+        html: requestedAppointmentTemplate({
+          doctorName: doctor.user.fullName,
+          patientName: patient.user.fullName,
+          date: formatDate(result.timeSlot.startTime),
+          startTime: formatTime(result.timeSlot.startTime),
+          endTime: formatTime(result.timeSlot.endTime),
+        }),
       });
 
       return result;
@@ -102,26 +147,16 @@ export const appointmentService = {
     }
 
     const appointments = await prisma.appointment.findMany({
-      where: {
-        patientId: patientProfile.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: { patientId: patientProfile.id },
+      orderBy: { createdAt: "desc" },
       include: {
         doctor: {
           include: {
-            user: {
-              select: {
-                fullName: true,
-              },
-            },
+            user: { select: { fullName: true } },
           },
         },
         timeSlot: {
-          include: {
-            availability: true,
-          },
+          include: { availability: true },
         },
       },
     });
@@ -131,13 +166,11 @@ export const appointmentService = {
       notes: appointment.notes,
       reportUrl: appointment.reportUrl,
       status: appointment.status,
-
       doctor: {
         fullName: appointment.doctor.user.fullName,
         specialization: appointment.doctor.specialization,
         fees: appointment.doctor.fees,
       },
-
       schedule: {
         date: appointment.timeSlot.availability.date,
         startTime: appointment.timeSlot.startTime,
@@ -158,12 +191,8 @@ export const appointmentService = {
     }
 
     const appointments = await prisma.appointment.findMany({
-      where: {
-        doctorId: doctorProfile.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: { doctorId: doctorProfile.id },
+      orderBy: { createdAt: "desc" },
       include: {
         patient: {
           include: {
@@ -171,6 +200,7 @@ export const appointmentService = {
               select: {
                 fullName: true,
                 phone: true,
+                email: true,
               },
             },
           },
@@ -178,9 +208,7 @@ export const appointmentService = {
         timeSlot: {
           include: {
             availability: {
-              select: {
-                date: true,
-              },
+              select: { date: true },
             },
           },
         },
@@ -192,17 +220,139 @@ export const appointmentService = {
       status: appointment.status,
       notes: appointment.notes,
       reportUrl: appointment.reportUrl,
-
       patient: {
         fullName: appointment.patient.user.fullName,
         phone: appointment.patient.user.phone,
       },
-
       schedule: {
         date: appointment.timeSlot.availability.date,
         startTime: appointment.timeSlot.startTime,
         endTime: appointment.timeSlot.endTime,
       },
     }));
+  },
+
+  async updateAppointmentStatus(
+    doctorUserId: number,
+    appointmentId: number,
+    status: AppointmentStatus
+  ) {
+    const doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { userId: doctorUserId },
+      include: {
+        user: {
+          select: {
+            fullName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!doctorProfile) {
+      throw new Error("Doctor profile not found");
+    }
+
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: {
+        timeSlot: true,
+        patient: {
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        doctor: {
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    if (appointment.doctorId !== doctorProfile.id) {
+      throw new Error("Unauthorized to update this appointment");
+    }
+
+    if (appointment.status !== AppointmentStatus.REQUESTED) {
+      throw new Error("Appointment already processed");
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      const updatedAppointment = await tx.appointment.update({
+        where: { id: appointmentId },
+        data: { status },
+      });
+
+      if (status === AppointmentStatus.REJECTED) {
+        await tx.timeSlot.update({
+          where: { id: appointment.timeSlotId },
+          data: { isAvailable: true },
+        });
+
+        // ✅ EMAIL → PATIENT (REJECTED)
+        await sendMail({
+          to: appointment.patient.user.email,
+          subject: "Appointment Rejected",
+          html: rejectedAppointmentTemplate({
+            doctorName: appointment.doctor.user.fullName,
+            patientName: appointment.patient.user.fullName,
+            date: formatDate(appointment.timeSlot.startTime),
+          }),
+        });
+      }
+
+      if (status === AppointmentStatus.APPROVED) {
+        const doctor = await tx.doctorProfile.findUnique({
+          where: { id: appointment.doctorId },
+        });
+
+        if (!doctor) {
+          throw new Error("Doctor profile not found for payment");
+        }
+
+        const paymentExpiry = new Date(Date.now() + 30 * 60 * 1000);
+
+        await tx.payment.create({
+          data: {
+            appointmentId: appointment.id,
+            amount: doctor.fees,
+            currency: "INR",
+            status: PaymentStatus.PENDING,
+            paymentExpiry,
+          },
+        });
+
+        // ✅ EMAIL → PATIENT (APPROVED)
+        await sendMail({
+          to: appointment.patient.user.email,
+          subject: "Appointment Approved",
+          html: approvedAppointmentTemplate({
+            doctorName: appointment.doctor.user.fullName,
+            patientName: appointment.patient.user.fullName,
+            date: formatDate(appointment.timeSlot.startTime),
+            startTime: formatTime(appointment.timeSlot.startTime),
+            endTime: formatTime(appointment.timeSlot.endTime),
+            amount: doctor.fees,
+          }),
+        });
+      }
+
+      return updatedAppointment;
+    });
   },
 };

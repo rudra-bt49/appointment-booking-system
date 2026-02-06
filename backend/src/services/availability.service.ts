@@ -2,7 +2,7 @@ import prisma from "../config/prisma";
 import { CreateAvailabilityPayload } from "../types/availability.types";
 
 export const availabilityService = {
-  
+
   async createAvailability(userId: number, payload: CreateAvailabilityPayload) {
     const doctor = await prisma.doctorProfile.findUnique({
       where: { userId },
@@ -12,6 +12,9 @@ export const availabilityService = {
       throw new Error("Doctor profile not found");
     }
 
+    // ----------------------------
+    // Parse date
+    // ----------------------------
     const [y, m, d] = payload.date.split("-").map(Number);
     if (!y || !m || !d) {
       throw new Error("Invalid date format");
@@ -19,6 +22,9 @@ export const availabilityService = {
 
     const baseDate = new Date(Date.UTC(y, m - 1, d));
 
+    // ----------------------------
+    // Parse time
+    // ----------------------------
     const [sh, sm, ss = "0"] = payload.startDuration.split(":");
     const [eh, em, es = "0"] = payload.endDuration.split(":");
 
@@ -33,6 +39,27 @@ export const availabilityService = {
       throw new Error("Start duration must be before end duration");
     }
 
+    // ----------------------------
+    // 🔒 Overlap check
+    // ----------------------------
+    const conflictingAvailability = await prisma.doctorAvailability.findFirst({
+      where: {
+        doctorId: doctor.id,
+        date: baseDate,
+        AND: [
+          { startDuration: { lt: endDuration } },
+          { endDuration: { gt: startDuration } },
+        ],
+      },
+    });
+
+    if (conflictingAvailability) {
+      throw new Error("Availability time overlaps with existing availability");
+    }
+
+    // ----------------------------
+    // Create availability
+    // ----------------------------
     const availability = await prisma.doctorAvailability.create({
       data: {
         doctorId: doctor.id,
@@ -42,7 +69,9 @@ export const availabilityService = {
       },
     });
 
-    // 🔹 Auto-create 30 min slots
+    // ----------------------------
+    // Auto-create 30 min slots
+    // ----------------------------
     const slots = [];
     let cursor = new Date(startDuration);
 
@@ -54,7 +83,7 @@ export const availabilityService = {
         availabilityId: availability.id,
         startTime: cursor,
         endTime: next,
-        isAvailable: true, 
+        isAvailable: true,
       });
 
       cursor = next;
@@ -70,7 +99,10 @@ export const availabilityService = {
       where: { userId },
       include: {
         availabilities: {
-          orderBy: { date: "asc" },
+          orderBy: [
+            { date: "asc" },
+            { startDuration: "asc" },
+          ],
           include: {
             timeSlots: {
               orderBy: { startTime: "asc" },
@@ -125,27 +157,25 @@ export const availabilityService = {
 
     const availabilityDate = new Date(Date.UTC(y, m - 1, d));
 
-    const availability = await prisma.doctorAvailability.findFirst({
+    const availabilities = await prisma.doctorAvailability.findMany({
       where: {
         doctorId: payload.doctorId,
         date: availabilityDate,
       },
+      orderBy: { startDuration: "asc" },
+      include: {
+        timeSlots: {
+          orderBy: { startTime: "asc" },
+          select: {
+            id: true,
+            startTime: true,
+            endTime: true,
+            isAvailable: true,
+          },
+        },
+      },
     });
 
-    if (!availability) return [];
-
-    return {
-      availabilityId: availability.id,
-      slots: await prisma.timeSlot.findMany({
-        where: { availabilityId: availability.id },
-        orderBy: { startTime: "asc" },
-        select: {
-          id: true,
-          startTime: true,
-          endTime: true,
-          isAvailable: true,
-        },
-      }),
-    };
+    return availabilities;
   },
 };

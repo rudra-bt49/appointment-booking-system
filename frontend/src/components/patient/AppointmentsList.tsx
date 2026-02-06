@@ -1,5 +1,5 @@
 "use client";
-
+import { useState, useMemo } from "react";
 import {
   IPatientAppointment,
 } from "@/types/patientAppointment.types";
@@ -13,36 +13,109 @@ import {
   Stethoscope,
 } from "lucide-react";
 import BackButton from "../common/BackButton";
+import PaymentButton from "../Payment/PaymentButton";
 
 interface AppointmentsListProps {
   appointments: IPatientAppointment[];
 }
 
+type TabType = "REQUESTED" | "APPROVED" | "REJECTED" | "SCHEDULED" | "COMPLETED";
+
 export default function AppointmentsList({
   appointments,
 }: AppointmentsListProps) {
+  const [activeTab, setActiveTab] = useState<TabType>("REQUESTED");
+
+  // Categorize appointments by status
+  const categorizedAppointments = useMemo(() => {
+    const categories: Record<TabType, IPatientAppointment[]> = {
+      REQUESTED: [],
+      APPROVED: [],
+      REJECTED: [],
+      SCHEDULED: [],
+      COMPLETED: [],
+    };
+
+    appointments.forEach((appointment) => {
+      const statusLower = appointment.status.toLowerCase();
+      
+      if (statusLower.includes("requested") || statusLower.includes("pending")) {
+        categories.REQUESTED.push(appointment);
+      } else if (statusLower.includes("approved")) {
+        categories.APPROVED.push(appointment);
+      } else if (statusLower.includes("rejected") || statusLower.includes("cancelled")) {
+        categories.REJECTED.push(appointment);
+      } else if (statusLower.includes("scheduled") || statusLower.includes("confirmed")) {
+        categories.SCHEDULED.push(appointment);
+      } else if (statusLower.includes("completed")) {
+        categories.COMPLETED.push(appointment);
+      }
+    });
+
+    return categories;
+  }, [appointments]);
+
+  const currentAppointments = categorizedAppointments[activeTab];
+
+  const tabs: TabType[] = ["REQUESTED", "APPROVED", "REJECTED", "SCHEDULED", "COMPLETED"];
 
   return (
     <div>
       {/* Back Button */}
-      <BackButton/>
-      
+      <BackButton />
 
-      {appointments.length === 0 ? (
+      {/* Tabs */}
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex gap-2 border-b border-gray-200">
+          {tabs.map((tab) => {
+            const count = categorizedAppointments[tab].length;
+            const isActive = activeTab === tab;
+
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`relative flex items-center gap-2 whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors duration-200 ${
+                  isActive
+                    ? "text-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <span>{tab}</span>
+                <span
+                  className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
+                    isActive
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {count}
+                </span>
+                {isActive && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Appointments List */}
+      {currentAppointments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="mb-4 rounded-full bg-gray-100 p-6">
             <Calendar className="h-12 w-12 text-gray-400" />
           </div>
           <p className="text-center text-lg font-medium text-gray-500">
-            No appointments found
+            No {activeTab.toLowerCase()} appointments found
           </p>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Your upcoming appointments will appear here
+            Your {activeTab.toLowerCase()} appointments will appear here
           </p>
         </div>
       ) : (
         <div className="space-y-4">
-          {appointments.map((appointment) => (
+          {currentAppointments.map((appointment) => (
             <div
               key={appointment.id}
               className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md"
@@ -53,12 +126,10 @@ export default function AppointmentsList({
                   <div className="rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 p-3">
                     <User className="h-6 w-6 text-blue-600" />
                   </div>
-
                   <div>
                     <h2 className="mb-1 text-xl font-semibold text-gray-900">
                       {appointment.doctor.fullName}
                     </h2>
-
                     <div className="flex items-center gap-2 text-gray-600">
                       <Stethoscope className="h-4 w-4" />
                       <p className="text-sm font-medium">
@@ -67,7 +138,6 @@ export default function AppointmentsList({
                     </div>
                   </div>
                 </div>
-
                 <span
                   className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wide ${
                     appointment.status &&
@@ -75,17 +145,18 @@ export default function AppointmentsList({
                       const statusLower = appointment.status.toLowerCase();
                       if (
                         statusLower.includes("confirmed") ||
-                        statusLower.includes("scheduled")
+                        statusLower.includes("scheduled") ||
+                        statusLower.includes("approved")
                       ) {
                         return "bg-green-50 text-green-700 border-green-200";
                       }
-                      if (statusLower.includes("pending")) {
+                      if (statusLower.includes("pending") || statusLower.includes("requested")) {
                         return "bg-yellow-50 text-yellow-700 border-yellow-200";
                       }
                       if (statusLower.includes("completed")) {
                         return "bg-blue-50 text-blue-700 border-blue-200";
                       }
-                      if (statusLower.includes("cancelled")) {
+                      if (statusLower.includes("cancelled") || statusLower.includes("rejected")) {
                         return "bg-red-50 text-red-700 border-red-200";
                       }
                       return "bg-gray-50 text-gray-700 border-gray-200";
@@ -103,13 +174,12 @@ export default function AppointmentsList({
                   <div className="rounded-lg bg-white p-2 shadow-sm">
                     <Calendar className="h-5 w-5 text-blue-600" />
                   </div>
-
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">
                       Date
                     </p>
                     <p className="text-sm font-semibold text-gray-900">
-                      {appointment.schedule.date.slice(0,10)}
+                      {appointment.schedule.date.slice(0, 10)}
                     </p>
                   </div>
                 </div>
@@ -119,7 +189,6 @@ export default function AppointmentsList({
                   <div className="rounded-lg bg-white p-2 shadow-sm">
                     <Clock className="h-5 w-5 text-purple-600" />
                   </div>
-
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">
                       Time
@@ -136,7 +205,6 @@ export default function AppointmentsList({
                   <div className="rounded-lg bg-white p-2 shadow-sm">
                     <DollarSign className="h-5 w-5 text-green-600" />
                   </div>
-
                   <div>
                     <p className="text-xs font-medium uppercase text-gray-500">
                       Consultation Fee
@@ -153,7 +221,6 @@ export default function AppointmentsList({
                 <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <div className="flex items-start gap-3">
                     <FileText className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-
                     <div>
                       <p className="mb-1 text-xs font-semibold uppercase text-amber-900">
                         Notes
@@ -166,19 +233,30 @@ export default function AppointmentsList({
                 </div>
               )}
 
-              {/* Report */}
-              {appointment.reportUrl && (
-                <a
-                  href={appointment.reportUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span>View Report</span>
-                  <ExternalLink className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                </a>
-              )}
+              {/* Actions */}
+              <div className="flex flex-wrap gap-3">
+                {/* Payment Button - Only for APPROVED appointments */}
+                {activeTab === "APPROVED" && (
+                  <PaymentButton
+                    appointmentId={String(appointment.id)}
+                    fees={appointment.doctor.fees}
+                  />
+                )}
+
+                {/* Report */}
+                {appointment.reportUrl && (
+                  <a
+                    href={appointment.reportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white transition-colors duration-200 hover:bg-blue-700"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>View Report</span>
+                    <ExternalLink className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>

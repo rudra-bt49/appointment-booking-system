@@ -21,6 +21,8 @@ const ROUTES = {
     REQUEST: "/request",
     MY_APPOINTMENTS: "/my",
     UPLOAD_REPORT: "/:id/upload-report",
+    BY_DOCTOR: "/by-doctor",
+    UPDATE_STATUS: "/update-status",
   },
 };
 

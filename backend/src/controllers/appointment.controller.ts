@@ -90,3 +90,39 @@ export const getDoctorAppointments = async (
     return errorResponse(res, error.message);
   }
 };
+
+export const updateAppointmentStatus = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    if (!req.user || req.user.role !== "DOCTOR") {
+      return errorResponse(res, "Only doctors can update appointment status", 403);
+    }
+
+    const { appointmentId, status } = req.body;
+
+    if (!appointmentId || !status) {
+      return errorResponse(res, "appointmentId and status are required", 400);
+    }
+
+    if (!["APPROVED", "REJECTED"].includes(status)) {
+      return errorResponse(res, "Invalid status value", 400);
+    }
+
+    const updatedAppointment =
+      await appointmentService.updateAppointmentStatus(
+        req.user.userId,
+        appointmentId,
+        status
+      );
+
+    return successResponse(
+      res,
+      `Appointment ${status.toLowerCase()} successfully`,
+      updatedAppointment
+    );
+  } catch (error: any) {
+    return errorResponse(res, error.message, 400);
+  }
+};

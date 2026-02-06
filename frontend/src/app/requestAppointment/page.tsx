@@ -9,6 +9,7 @@ import {
 import { availabilityService } from "@/services/availability.service";
 import BackButton from "@/components/common/BackButton";
 import BookingCalendar from "@/components/patient/BookingCalendar";
+import { IDoctorAvailability } from "@/types/availability.types";
 
 interface Slot {
   id: number;
@@ -45,7 +46,7 @@ export default function RequestAppointmentPage() {
 
     const fetchDoctor = async (): Promise<void> => {
       try {
-        const res = await getDoctorById(doctorUserId!);
+        const res = await getDoctorById(doctorUserId);
         setDoctorProfileId(res.data.doctorProfileId);
       } catch (err) {
         console.error(err);
@@ -56,7 +57,7 @@ export default function RequestAppointmentPage() {
   }, [doctorUserId]);
 
   /* --------------------------------------------
-     STEP 2: Fetch slots
+     STEP 2: Fetch slots (FIXED)
   --------------------------------------------- */
   const handleDateChange = async (
     date: string
@@ -67,12 +68,21 @@ export default function RequestAppointmentPage() {
     setSelectedSlotId(null);
 
     try {
-      const res = await availabilityService.getSlotsByDoctorAndDate(
-        doctorProfileId,
-        date
+      const res =
+        await availabilityService.getSlotsByDoctorAndDate(
+          doctorProfileId,
+          date
+        );
+
+      const availabilities: IDoctorAvailability[] =
+        res.data ?? [];
+
+      // 🔑 FLATTEN slots from all availability blocks
+      const allSlots = availabilities.flatMap(
+        (a) => a.timeSlots
       );
 
-      setSlots(res?.data?.slots ?? []);
+      setSlots(allSlots);
     } catch {
       setSlots([]);
     }
@@ -178,9 +188,7 @@ export default function RequestAppointmentPage() {
             rows={4}
             className="w-full rounded-xl border border-slate-300 px-4 py-3"
             value={notes}
-            onChange={(
-              e: React.ChangeEvent<HTMLTextAreaElement>
-            ) => setNotes(e.target.value)}
+            onChange={(e) => setNotes(e.target.value)}
           />
         </div>
 
@@ -193,9 +201,7 @@ export default function RequestAppointmentPage() {
           <input
             type="file"
             accept="application/pdf"
-            onChange={(
-              e: React.ChangeEvent<HTMLInputElement>
-            ) =>
+            onChange={(e) =>
               setReportFile(
                 e.target.files ? e.target.files[0] : null
               )

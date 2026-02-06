@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { createAppointmentRequest } from "../controllers/appointment.controller";
+import { createAppointmentRequest, 
+  updateAppointmentStatus, 
+  getDoctorAppointments 
+} from "../controllers/appointment.controller";
 import { getMyAppointments } from "../controllers/appointment.controller";
 
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { uploadReport } from "../middlewares/upload.middleware";
-import { getDoctorAppointments } from "../controllers/appointment.controller";
 import { doctorOnlyMiddleware } from "../middlewares/doctor.middleware";
 import ROUTES from "../config/routes";
 
@@ -13,7 +15,7 @@ const router = Router();
 router.post(
   ROUTES.APPOINTMENT.REQUEST,
   authMiddleware,
-  uploadReport.single("report"), // ✅ PDF handled here
+  uploadReport.single("report"), 
   createAppointmentRequest
 );
 router.get(
@@ -23,10 +25,17 @@ router.get(
 );
 
 router.get(
-  "/by-doctor",
+  ROUTES.APPOINTMENT.BY_DOCTOR,
   authMiddleware,
   doctorOnlyMiddleware,
   getDoctorAppointments
+);
+
+router.patch(
+  ROUTES.APPOINTMENT.UPDATE_STATUS,
+  authMiddleware,
+  doctorOnlyMiddleware,
+  updateAppointmentStatus
 );
 
 export default router;
