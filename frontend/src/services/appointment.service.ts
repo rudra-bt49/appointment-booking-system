@@ -123,3 +123,23 @@ export const updateAppointmentStatus = async (
   );
   return res.data;
 };
+
+/* ----------------------------------------
+   Get patient history appointments
+----------------------------------------- */
+export const getPatientHistoryAppointments = async () => {
+  const res = await axiosInstance.get(
+    "/appointments/history/patient"
+  );
+  return res.data;
+};
+
+/* ----------------------------------------
+   Get doctor history appointments
+----------------------------------------- */
+export const getDoctorHistoryAppointments = async () => {
+  const res = await axiosInstance.get(
+    "/appointments/history/doctor"
+  );
+  return res.data;
+};

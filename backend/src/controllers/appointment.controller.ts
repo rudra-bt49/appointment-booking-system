@@ -126,3 +126,59 @@ export const updateAppointmentStatus = async (
     return errorResponse(res, error.message, 400);
   }
 };
+
+// ================================
+// APPOINTMENT HISTORY (PATIENT)
+// ================================
+export const getPatientAppointmentHistory = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || req.user.role !== Role.PATIENT) {
+      return errorResponse(res, "Only patients can access history", 403);
+    }
+
+    const history =
+      await appointmentService.getPatientAppointmentHistory(
+        req.user.userId
+      );
+
+    return successResponse(
+      res,
+      "Patient appointment history fetched",
+      history
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================================
+// APPOINTMENT HISTORY (DOCTOR)
+// ================================
+export const getDoctorAppointmentHistory = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user || req.user.role !== Role.DOCTOR) {
+      return errorResponse(res, "Only doctors can access history", 403);
+    }
+
+    const history =
+      await appointmentService.getDoctorAppointmentHistory(
+        req.user.userId
+      );
+
+    return successResponse(
+      res,
+      "Doctor appointment history fetched",
+      history
+    );
+  } catch (error) {
+    next(error);
+  }
+};

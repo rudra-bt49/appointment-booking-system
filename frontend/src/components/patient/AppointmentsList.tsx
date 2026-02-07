@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   IPatientAppointment,
 } from "@/types/patientAppointment.types";
@@ -14,50 +14,87 @@ import {
 } from "lucide-react";
 import BackButton from "../common/BackButton";
 import PaymentButton from "../Payment/PaymentButton";
+import { getPatientHistoryAppointments } from "@/services/appointment.service";
 
 interface AppointmentsListProps {
   appointments: IPatientAppointment[];
 }
 
-type TabType = "REQUESTED" | "APPROVED" | "REJECTED" | "SCHEDULED" | "COMPLETED";
+type TabType =
+  | "REQUESTED"
+  | "APPROVED"
+  | "SCHEDULED"
+  | "HISTORY";
 
 export default function AppointmentsList({
   appointments,
 }: AppointmentsListProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("REQUESTED");
+  // ✅ Default tab changed to SCHEDULED
+  const [activeTab, setActiveTab] = useState<TabType>("SCHEDULED");
+  const [historyAppointments, setHistoryAppointments] = useState<IPatientAppointment[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  // Fetch history appointments when History tab is active
+  useEffect(() => {
+    if (activeTab === "HISTORY") {
+      const fetchHistoryAppointments = async () => {
+        try {
+          setHistoryLoading(true);
+          setHistoryError(null);
+          const response = await getPatientHistoryAppointments();
+          setHistoryAppointments(response.data || []);
+        } catch (error) {
+          console.error("Failed to fetch history appointments:", error);
+          setHistoryError("Failed to load history appointments");
+          setHistoryAppointments([]);
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+
+      fetchHistoryAppointments();
+    }
+  }, [activeTab]);
 
   // Categorize appointments by status
   const categorizedAppointments = useMemo(() => {
     const categories: Record<TabType, IPatientAppointment[]> = {
       REQUESTED: [],
       APPROVED: [],
-      REJECTED: [],
       SCHEDULED: [],
-      COMPLETED: [],
+      HISTORY: [],
     };
 
     appointments.forEach((appointment) => {
       const statusLower = appointment.status.toLowerCase();
-      
-      if (statusLower.includes("requested") || statusLower.includes("pending")) {
+
+      if (
+        statusLower.includes("requested") ||
+        statusLower.includes("pending")
+      ) {
         categories.REQUESTED.push(appointment);
       } else if (statusLower.includes("approved")) {
         categories.APPROVED.push(appointment);
-      } else if (statusLower.includes("rejected") || statusLower.includes("cancelled")) {
-        categories.REJECTED.push(appointment);
-      } else if (statusLower.includes("scheduled") || statusLower.includes("confirmed")) {
+      } else if (
+        statusLower.includes("scheduled") ||
+        statusLower.includes("confirmed")
+      ) {
         categories.SCHEDULED.push(appointment);
-      } else if (statusLower.includes("completed")) {
-        categories.COMPLETED.push(appointment);
       }
     });
 
     return categories;
   }, [appointments]);
 
-  const currentAppointments = categorizedAppointments[activeTab];
+  const currentAppointments = activeTab === "HISTORY" ? historyAppointments : categorizedAppointments[activeTab];
 
-  const tabs: TabType[] = ["REQUESTED", "APPROVED", "REJECTED", "SCHEDULED", "COMPLETED"];
+  const tabs: TabType[] = [
+    "REQUESTED",
+    "APPROVED",
+    "SCHEDULED",
+    "HISTORY",
+  ];
 
   return (
     <div>
@@ -68,7 +105,7 @@ export default function AppointmentsList({
       <div className="mb-6 overflow-x-auto">
         <div className="flex gap-2 border-b border-gray-200">
           {tabs.map((tab) => {
-            const count = categorizedAppointments[tab].length;
+            const count = tab === "HISTORY" ? historyAppointments.length : categorizedAppointments[tab].length;
             const isActive = activeTab === tab;
 
             return (
@@ -100,8 +137,32 @@ export default function AppointmentsList({
         </div>
       </div>
 
+      {/* Loading State for History */}
+      {activeTab === "HISTORY" && historyLoading && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="mb-4 animated-spin rounded-full bg-blue-100 p-6">
+            <Calendar className="h-12 w-12 text-blue-400 animate-pulse" />
+          </div>
+          <p className="text-center text-lg font-medium text-gray-500">
+            Loading history appointments...
+          </p>
+        </div>
+      )}
+
+      {/* Error State for History */}
+      {activeTab === "HISTORY" && historyError && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="mb-4 rounded-full bg-red-100 p-6">
+            <Calendar className="h-12 w-12 text-red-400" />
+          </div>
+          <p className="text-center text-lg font-medium text-red-600">
+            {historyError}
+          </p>
+        </div>
+      )}
+
       {/* Appointments List */}
-      {currentAppointments.length === 0 ? (
+      {!historyLoading && !historyError && currentAppointments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="mb-4 rounded-full bg-gray-100 p-6">
             <Calendar className="h-12 w-12 text-gray-400" />
@@ -113,7 +174,7 @@ export default function AppointmentsList({
             Your {activeTab.toLowerCase()} appointments will appear here
           </p>
         </div>
-      ) : (
+      ) : !historyLoading && currentAppointments.length > 0 && (
         <div className="space-y-4">
           {currentAppointments.map((appointment) => (
             <div
@@ -150,13 +211,19 @@ export default function AppointmentsList({
                       ) {
                         return "bg-green-50 text-green-700 border-green-200";
                       }
-                      if (statusLower.includes("pending") || statusLower.includes("requested")) {
+                      if (
+                        statusLower.includes("pending") ||
+                        statusLower.includes("requested")
+                      ) {
                         return "bg-yellow-50 text-yellow-700 border-yellow-200";
                       }
                       if (statusLower.includes("completed")) {
                         return "bg-blue-50 text-blue-700 border-blue-200";
                       }
-                      if (statusLower.includes("cancelled") || statusLower.includes("rejected")) {
+                      if (
+                        statusLower.includes("cancelled") ||
+                        statusLower.includes("rejected")
+                      ) {
                         return "bg-red-50 text-red-700 border-red-200";
                       }
                       return "bg-gray-50 text-gray-700 border-gray-200";

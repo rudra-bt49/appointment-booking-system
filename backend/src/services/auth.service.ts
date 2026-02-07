@@ -2,14 +2,14 @@ import prisma from "../config/prisma";
 import jwt from "jsonwebtoken";
 import { Role } from "@prisma/client";
 import { hashPassword } from "../utils/hash";
-import { RegisterInput } from "../types/auth.types";
-
+import { RegisterInput, LoginInput } from "../types/auth.types";
 import { comparePassword } from "../utils/hash";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/token";
-import { LoginInput } from "../types/auth.types";
+import { sendMail } from "../utils/smtp/sendMail";
+import { welcomeSignupTemplate } from "../utils/smtp/emailTemplates";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -37,7 +37,7 @@ export const registerUser = async (data: RegisterInput) => {
 
   const hashedPassword = await hashPassword(password);
 
-  return prisma.$transaction(async (tx) => {
+  const user = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
         email,
@@ -64,13 +64,14 @@ export const registerUser = async (data: RegisterInput) => {
     }
 
     if (role === Role.PATIENT) {
-      if(!gender){
+      if (!gender) {
         throw new Error("Patient gender is required");
       }
+
       await tx.patientProfile.create({
         data: {
           userId: user.id,
-          gender: gender!.toUpperCase(),
+          gender: gender.toUpperCase(),
           dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
         },
       });
@@ -78,7 +79,30 @@ export const registerUser = async (data: RegisterInput) => {
 
     return user;
   });
+
+  /* ===============================
+     SEND SIGNUP EMAIL (AFTER SUCCESS)
+     =============================== */
+
+  await sendMail({
+    to: user.email,
+    subject: "🎉 Welcome to Appointment Booking System",
+    html: welcomeSignupTemplate({
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      specialization,
+      experience,
+      gender,
+    }),
+  });
+
+  return user;
 };
+
+/* ===============================
+   LOGIN / REFRESH / LOGOUT (UNCHANGED)
+   =============================== */
 
 export const loginUser = async ({ email, password }: LoginInput) => {
   const user = await prisma.user.findUnique({
@@ -110,7 +134,6 @@ export const loginUser = async ({ email, password }: LoginInput) => {
   const refreshTokenExpiry = new Date();
   refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7);
 
-  // Single-device login: replace existing refresh token
   await prisma.refreshToken.upsert({
     where: { userId: user.id },
     update: {
