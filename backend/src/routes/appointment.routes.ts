@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { createAppointmentRequest, 
   updateAppointmentStatus, 
-  getDoctorAppointments 
+  getDoctorAppointments,
+  getPatientAppointmentHistory,
+  getDoctorAppointmentHistory,
 } from "../controllers/appointment.controller";
 import { getMyAppointments } from "../controllers/appointment.controller";
 
@@ -37,5 +39,18 @@ router.patch(
   doctorOnlyMiddleware,
   updateAppointmentStatus
 );
+
+router.get(
+  ROUTES.APPOINTMENT.HISTORY_PATIENT,
+  authMiddleware,
+  getPatientAppointmentHistory
+);
+
+router.get(
+  ROUTES.APPOINTMENT.HISTORY_DOCTOR,
+  authMiddleware,
+  doctorOnlyMiddleware,
+  getDoctorAppointmentHistory
+)
 
 export default router;

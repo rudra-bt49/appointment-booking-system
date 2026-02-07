@@ -39,7 +39,6 @@ export default function LoginPage() {
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
             try {
               const response = await authService.login(values);
-              // ✅ success alert
               Swal.fire({
                 icon: "success",
                 title: "Login Successful",
@@ -48,7 +47,6 @@ export default function LoginPage() {
                 showConfirmButton: false,
               });
               setUser(response);
-              // localStorage.setItem("user", JSON.stringify(response));
               setTimeout(() => {
                 router.push(API_ROUTES.HOME);
               }, 1500);
@@ -60,7 +58,6 @@ export default function LoginPage() {
                   };
                 })?.response?.data?.message ||
                 "Invalid email or password";
-              // ❌ error alert
               Swal.fire({
                 icon: "error",
                 title: "Login Failed",

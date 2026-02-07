@@ -23,7 +23,12 @@ const ROUTES = {
     UPLOAD_REPORT: "/:id/upload-report",
     BY_DOCTOR: "/by-doctor",
     UPDATE_STATUS: "/update-status",
+    HISTORY_PATIENT: "/history/patient",
+    HISTORY_DOCTOR: "/history/doctor",
   },
+  PAYMENT: {
+    CHECK_EXPIRY: "/check-expiry",
+  }
 };
 
 export default ROUTES;

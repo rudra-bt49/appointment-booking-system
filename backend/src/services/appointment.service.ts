@@ -13,6 +13,10 @@ import {
   requestedAppointmentTemplate,
 } from "../utils/smtp/emailTemplates";
 
+/*getting today's date*/
+const todayUTC = new Date();
+todayUTC.setUTCHours(0, 0, 0, 0);
+
 /**
  * ✅ FORMATTERS
  * Force UTC so time is displayed EXACTLY as stored in DB
@@ -355,4 +359,148 @@ export const appointmentService = {
       return updatedAppointment;
     });
   },
+  async getPatientAppointmentHistory(
+    userId: number
+  ): Promise<PatientAppointmentResponse[]> {
+    const patientProfile = await prisma.patientProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!patientProfile) {
+      throw new Error("Patient profile not found");
+    }
+
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        patientId: patientProfile.id,
+        OR: [
+          {
+            status: {
+              in: [
+                AppointmentStatus.CANCELLED,
+                AppointmentStatus.REJECTED,
+                AppointmentStatus.COMPLETED
+              ],
+            },
+          },
+          {
+            timeSlot: {
+              availability: {
+                date: {
+                  lt: todayUTC,
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        doctor: {
+          include: {
+            user: { select: { fullName: true } },
+          },
+        },
+        timeSlot: {
+          include: {
+            availability: true,
+          },
+        },
+      },
+    });
+
+    return appointments.map((appointment) => ({
+      id: appointment.id,
+      notes: appointment.notes,
+      reportUrl: appointment.reportUrl,
+      status: appointment.status,
+      doctor: {
+        fullName: appointment.doctor.user.fullName,
+        specialization: appointment.doctor.specialization,
+        fees: appointment.doctor.fees,
+      },
+      schedule: {
+        date: appointment.timeSlot.availability.date,
+        startTime: appointment.timeSlot.startTime,
+        endTime: appointment.timeSlot.endTime,
+      },
+    }));
+  },
+  async getDoctorAppointmentHistory(
+    userId: number
+  ): Promise<DoctorAppointmentResponse[]> {
+    const doctorProfile = await prisma.doctorProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!doctorProfile) {
+      throw new Error("Doctor profile not found");
+    }
+
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        doctorId: doctorProfile.id,
+        OR: [
+          {
+            status: {
+              in: [
+                AppointmentStatus.CANCELLED,
+                AppointmentStatus.REJECTED,
+                AppointmentStatus.COMPLETED
+              ],
+            },
+          },
+          {
+            timeSlot: {
+              availability: {
+                date: {
+                  lt: todayUTC,
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        patient: {
+          include: {
+            user: {
+              select: {
+                fullName: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        timeSlot: {
+          include: {
+            availability: true,
+          },
+        },
+      },
+    });
+
+    return appointments.map((appointment) => ({
+      id: appointment.id,
+      status: appointment.status,
+      notes: appointment.notes,
+      reportUrl: appointment.reportUrl,
+      patient: {
+        fullName: appointment.patient.user.fullName,
+        phone: appointment.patient.user.phone,
+      },
+      schedule: {
+        date: appointment.timeSlot.availability.date,
+        startTime: appointment.timeSlot.startTime,
+        endTime: appointment.timeSlot.endTime,
+      },
+    }));
+  }
 };

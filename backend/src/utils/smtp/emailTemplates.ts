@@ -56,3 +56,51 @@ export const requestedAppointmentTemplate = (data: {
     <li><b>Status:</b> Requested</li>
   </ul>
 `;
+
+export const welcomeSignupTemplate = (data: {
+  fullName: string;
+  role: string;
+  email: string;
+  specialization?: string;
+  experience?: number;
+  gender?: string;
+}) => `
+  <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>🎉 Welcome to Appointment Booking System!</h2>
+
+    <p>Hi <b>${data.fullName}</b>,</p>
+
+    <p>
+      Congratulations! Your account has been successfully created as a 
+      <b>${data.role}</b>.
+    </p>
+
+    <h3>📌 Account Details</h3>
+    <ul>
+      <li><b>Email:</b> ${data.email}</li>
+      <li><b>Role:</b> ${data.role}</li>
+      ${
+        data.role === "DOCTOR"
+          ? `
+            <li><b>Specialization:</b> ${data.specialization}</li>
+            <li><b>Experience:</b> ${data.experience} years</li>
+          `
+          : `
+            <li><b>Gender:</b> ${data.gender}</li>
+          `
+      }
+    </ul>
+
+    <p>
+      You can now log in and start using our platform.
+    </p>
+
+    <p>
+      If you have any questions, feel free to contact our support team.
+    </p>
+
+    <br />
+    <p>Regards,</p>
+    <p><b>Appointment Booking System Team</b></p>
+  </div>
+`;

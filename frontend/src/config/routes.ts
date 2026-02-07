@@ -18,6 +18,9 @@ const API_ROUTES = {
     BY_DOCTOR: "/appointments/by-doctor",
     UPDATE_STATUS: "/appointments/update-status",
   },
+  PAYMENT: {
+    CHECK_EXPIRY:"/payments/check-expiry"
+  },
   PROFILE: "/profile",
   PROFILES: {
     GET_PROFILE: "/profile/get-profile",

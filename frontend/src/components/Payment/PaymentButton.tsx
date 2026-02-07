@@ -1,16 +1,57 @@
 "use client";
+
+import axiosInstance from "@/config/axios";
+import Swal from "sweetalert2";
 import { DollarSign } from "lucide-react";
+import API_ROUTES from "@/config/routes";
 
 interface PaymentButtonProps {
   appointmentId: string;
   fees: number;
 }
 
-export default function PaymentButton({ appointmentId, fees }: PaymentButtonProps) {
-  const handlePayment = () => {
-    // Add your payment logic here
-    console.log(`Processing payment for appointment ${appointmentId}, amount: ₹${fees}`);
-    // You can redirect to payment page or open payment modal
+export default function PaymentButton({
+  appointmentId
+}: PaymentButtonProps) {
+  const handlePayment = async () => {
+    try {
+      const expiryRes = await axiosInstance.post(
+        API_ROUTES.PAYMENT.CHECK_EXPIRY,
+        {
+          appointmentId,
+        }
+      );
+
+      if (expiryRes.data.data.expired) {
+        await Swal.fire({
+          icon: "error",
+          title: "Payment Expired",
+          text: "Payment window expired. Appointment has been cancelled.",
+        });
+        return;
+      }
+
+      const stripeRes = await axiosInstance.post(
+        "/stripe/create-checkout-session",
+        {
+          appointmentId,
+        }
+      );
+
+      const sessionUrl = stripeRes.data.data.sessionUrl;
+
+      if (!sessionUrl) {
+        throw new Error("Stripe session URL not found");
+      }
+
+      window.location.href = sessionUrl;
+    } catch {
+      await Swal.fire({
+        icon: "error",
+        title: "Payment Failed",
+        text: "Something went wrong while initiating payment.",
+      });
+    }
   };
 
   return (
