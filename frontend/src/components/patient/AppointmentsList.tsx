@@ -30,6 +30,12 @@ type TabType =
 
 const ITEMS_PER_PAGE = 2;
 
+interface HistoryAppointmentsResponse {
+  success: boolean;
+  message: string;
+  data: IPatientAppointment[];
+}
+
 export default function AppointmentsList({
   appointments,
 }: AppointmentsListProps) {
@@ -55,7 +61,7 @@ export default function AppointmentsList({
         try {
           setHistoryLoading(true);
           setHistoryError(null);
-          const response = await getPatientHistoryAppointments();
+          const response = await getPatientHistoryAppointments() as HistoryAppointmentsResponse;
           setHistoryAppointments(response.data || []);
           hasHistoryFetched.current = true;
         } catch (error) {
@@ -66,6 +72,7 @@ export default function AppointmentsList({
           setHistoryLoading(false);
         }
       };
+
       fetchHistoryAppointments();
     }
   }, [activeTab]);
@@ -337,7 +344,7 @@ export default function AppointmentsList({
 
                   {/* Report */}
                   {appointment.reportUrl && (
-                    <a
+                  <a  
                       href={appointment.reportUrl}
                       target="_blank"
                       rel="noopener noreferrer"
