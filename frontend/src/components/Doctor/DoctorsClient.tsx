@@ -35,7 +35,6 @@ export default function DoctorsClient({
         console.error("Error fetching specializations:", error);
       }
     };
-
     fetchSpecializations();
   }, []);
 
@@ -91,34 +90,79 @@ export default function DoctorsClient({
     <div className="min-h-screen bg-slate-50/50">
       <div className="mx-auto max-w-[2160px] px-4 py-8 sm:px-6 lg:px-12">
         <BackButton />
+        
+        {/* Header and Search Section - Side by Side */}
+        <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          {/* Left: Header */}
+          <header className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Available Doctors
+            </h1>
+            <p className="text-slate-500">
+              Find and book appointments with our world-class medical specialists.
+            </p>
+          </header>
 
-        <header className="mb-8 flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Available Doctors
-          </h1>
-          <p className="text-slate-500">
-            Find and book appointments with our world-class medical specialists.
-          </p>
-        </header>
+          {/* Right: Search and Filter Section */}
+          <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap">
+            {/* Search Bar */}
+            <div className="flex w-full items-center sm:w-64">
+              <input
+                type="text"
+                placeholder="Search doctors by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="ml-2 text-slate-400 hover:text-slate-600"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
 
-        {/* Search and Filter Section */}
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Search Bar */}
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search doctors by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            {searchQuery && (
+            {/* Specialization Filter */}
+            <div className="flex w-full items-center sm:w-48">
+              <select
+                value={selectedSpecialization}
+                onChange={(e) => setSelectedSpecialization(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">All Specializations</option>
+                {specializations.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            {(searchQuery || selectedSpecialization) && (
               <button
-                onClick={() => setSearchQuery("")}
-                className="ml-2 text-slate-400 hover:text-slate-600"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedSpecialization("");
+                }}
+                className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
               >
                 <svg
-                  className="h-5 w-5"
+                  className="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -130,51 +174,10 @@ export default function DoctorsClient({
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
+                Clear Filters
               </button>
             )}
           </div>
-
-          {/* Specialization Filter */}
-          <div className="flex items-center">
-            <select
-              value={selectedSpecialization}
-              onChange={(e) => setSelectedSpecialization(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">All Specializations</option>
-              {specializations.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Clear Filters Button */}
-          {(searchQuery || selectedSpecialization) && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedSpecialization("");
-              }}
-              className="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-              Clear Filters
-            </button>
-          )}
         </div>
 
         {/* Loading State */}

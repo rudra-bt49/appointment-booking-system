@@ -5,6 +5,7 @@ import BookingCalendar from "@/components/patient/BookingCalendar";
 import { availabilityService } from "@/services/availability.service";
 import { getLoggedInDoctorProfileId } from "@/services/doctorIdentity.service";
 import { ITimeSlot, IDoctorAvailability } from "@/types/availability.types";
+import Loader from "../../components/Loader/Loader";
 
 export default function AvailabilityPage() {
   const [doctorId, setDoctorId] = useState<number | null>(null);
@@ -18,7 +19,7 @@ export default function AvailabilityPage() {
   const [startDuration, setStartDuration] = useState("");
   const [endDuration, setEndDuration] = useState("");
   const [validationError, setValidationError] = useState("");
-
+  const [isGenerating, setIsGenerating] = useState(false);
   const createSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,11 +28,9 @@ export default function AvailabilityPage() {
       .catch(() => setDoctorId(null));
   }, []);
 
-
   // 🔹 FETCH AVAILABLE DATES (ONCE)
   useEffect(() => {
     if (!doctorId) return;
-
     availabilityService
       .getAvailableDates(doctorId)
       .then((res) => {
@@ -58,47 +57,42 @@ export default function AvailabilityPage() {
 
   const validateTimeSlots = (start: string, end: string): string => {
     if (!start || !end) return "Please select both start and end times";
-
     const [sh, sm] = start.split(":").map(Number);
     const [eh, em] = end.split(":").map(Number);
-
     const duration = eh * 60 + em - (sh * 60 + sm);
-
     if (duration <= 0) return "End time must be after start time";
     if (duration < 60) return "Minimum slot duration is 1 hour";
     if (duration > 720) return "Maximum slot duration is 12 hours";
-
     return "";
   };
 
   const generateSlots = async () => {
     if (!doctorId) return;
-
     const error = validateTimeSlots(startDuration, endDuration);
     if (error) {
       setValidationError(error);
       return;
     }
-
     setValidationError("");
-
-    await availabilityService.createAvailability({
-      date,
-      startDuration,
-      endDuration,
-    });
-
-    const res = await availabilityService.getSlotsByDoctorAndDate(
-      doctorId,
-      date
-    );
-
-    const availabilities = res.data ?? [];
-    setSlots(availabilities.flatMap(a => a.timeSlots));
-
-    setShowCreate(false);
-    setStartDuration("");
-    setEndDuration("");
+    setIsGenerating(true);
+    try {
+      await availabilityService.createAvailability({
+        date,
+        startDuration,
+        endDuration,
+      });
+      const res = await availabilityService.getSlotsByDoctorAndDate(
+        doctorId,
+        date
+      );
+      const availabilities = res.data ?? [];
+      setSlots(availabilities.flatMap(a => a.timeSlots));
+      setShowCreate(false);
+      setStartDuration("");
+      setEndDuration("");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const deleteSlot = async (slotId: number) => {
@@ -167,17 +161,14 @@ export default function AvailabilityPage() {
               {formatDate(date)}
             </p>
           </div>
-          {/* <div className="max-w-md mx-auto">
-            <BookingCalendar onSelectDate={setDate} />
-          </div> */}
           <div className="bg-white rounded-2xl shadow-lg border p-6 mb-6">
-          <div className="max-w-md mx-auto">
-            <BookingCalendar
-              onSelectDate={setDate}
-              availableDates={availableDates}
-            />
+            <div className="max-w-md mx-auto">
+              <BookingCalendar
+                onSelectDate={setDate}
+                availableDates={availableDates}
+              />
+            </div>
           </div>
-        </div>
         </div>
 
         {/* Time Slots Card */}
@@ -205,7 +196,7 @@ export default function AvailabilityPage() {
 
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+              <Loader />
             </div>
           )}
 
@@ -285,7 +276,8 @@ export default function AvailabilityPage() {
               </div>
               <button
                 onClick={handleCancelCreate}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium"
+                disabled={isGenerating}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-4 h-4" />
                 Cancel
@@ -305,8 +297,9 @@ export default function AvailabilityPage() {
                       setStartDuration(e.target.value);
                       setValidationError("");
                     }}
+                    disabled={isGenerating}
                     placeholder="e.g., 09:00 AM"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                   <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -327,8 +320,9 @@ export default function AvailabilityPage() {
                       setEndDuration(e.target.value);
                       setValidationError("");
                     }}
+                    disabled={isGenerating}
                     placeholder="e.g., 05:00 PM"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-700 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                   <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
@@ -368,10 +362,20 @@ export default function AvailabilityPage() {
 
             <button
               onClick={generateSlots}
-              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3.5 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg"
+              disabled={isGenerating}
+              className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3.5 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
             >
-              <Plus className="w-5 h-5" />
-              Generate Slots
+              {isGenerating ? (
+                <>
+                  <Loader />
+                  <span>Generating Slots...</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" />
+                  Generate Slots
+                </>
+              )}
             </button>
           </div>
         )}

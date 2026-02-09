@@ -17,7 +17,7 @@ import API_ROUTES from "@/config/routes";
 const navItems = [
   {
     label: "Dashboard",
-    href: "/doctor/dashboard",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {

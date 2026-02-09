@@ -9,7 +9,7 @@ import availabilityRoutes from "./routes/availability.routes";
 import appointmentRoutes from "./routes/appointment.routes";
 import paymentRoutes from "./routes/payment.routes";
 import stripeRoutes from "./routes/stripe.routes";
-
+import doctorAnalyticsRoutes from "./routes/doctorAnalytics.routes";
 
 const app = express();
 
@@ -36,5 +36,6 @@ app.use("/api/payments", paymentRoutes);
 
 // app.use("/api/stripe/webhook", bodyParser.raw({ type: "application/json" }));
 app.use("/api/stripe", stripeRoutes);
+app.use("/api/doctor/analytics", doctorAnalyticsRoutes);
 
 export default app;
