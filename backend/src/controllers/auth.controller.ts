@@ -12,6 +12,8 @@ import { validateRegisterInput } from "../utils/validators/auth.validator";
 import { validateLoginInput } from "../utils/validators/auth.validator";
 
 import { getMe } from "../services/auth.service";
+import { sendForgotPasswordEmail, resetPasswordWithToken } from "../services/auth.service";
+import { validateForgotPasswordInput, validateResetPasswordInput } from "../utils/validators/auth.validator";
 
 
 export const register = async (req: Request, res: Response) => {
@@ -119,5 +121,27 @@ export const me = async (req: AuthRequest, res: Response) => {
     return successResponse(res, "User authenticated", user);
   } catch (error: any) {
     return errorResponse(res, error.message, 401);
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    validateForgotPasswordInput(req.body);
+    const { email } = req.body;
+    await sendForgotPasswordEmail(email);
+    return successResponse(res, "If an account with that email exists, a reset link has been sent.");
+  } catch (error: any) {
+    return errorResponse(res, error.message);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    validateResetPasswordInput(req.body);
+    const { token, password } = req.body;
+    await resetPasswordWithToken(token, password);
+    return successResponse(res, "Password has been reset successfully");
+  } catch (error: any) {
+    return errorResponse(res, error.message, 400);
   }
 };

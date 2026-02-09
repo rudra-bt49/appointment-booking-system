@@ -70,3 +70,29 @@ export const validateLoginInput = (data: LoginInput) => {
     throw new Error("Password is required");
   }
 };
+
+export const validateForgotPasswordInput = (data: { email?: string }) => {
+  const { email } = data;
+  if (!email) {
+    throw new Error("Email is required");
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    throw new Error("Invalid email format");
+  }
+};
+
+export const validateResetPasswordInput = (data: { token?: string; password?: string; confirmPassword?: string }) => {
+  const { token, password, confirmPassword } = data;
+  if (!token) {
+    throw new Error("Token is required");
+  }
+  if (!password) {
+    throw new Error("Password is required");
+  }
+  if (!PASSWORD_REGEX.test(password)) {
+    throw new Error("Password must contain uppercase, lowercase, special character and be at least 8 characters long");
+  }
+  if (password !== confirmPassword) {
+    throw new Error("Password and confirm password do not match");
+  }
+};

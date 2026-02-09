@@ -1,37 +1,34 @@
 "use client";
-
 import { useState } from "react";
 
 interface BookingCalendarProps {
   onSelectDate: (date: string) => void;
+  availableDates: string[];
 }
 
 export default function BookingCalendar({
   onSelectDate,
+  availableDates,
 }: BookingCalendarProps) {
   const today = new Date();
 
-  const [currentYear, setCurrentYear] = useState<number>(
-    today.getFullYear()
-  );
-  const [currentMonth, setCurrentMonth] = useState<number>(
-    today.getMonth()
-  );
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [selectedDate, setSelectedDate] = useState<string>("");
 
-  const daysInMonth: number = new Date(
+  const daysInMonth = new Date(
     currentYear,
     currentMonth + 1,
     0
   ).getDate();
 
-  const firstDayIndex: number = new Date(
+  const firstDayIndex = new Date(
     currentYear,
     currentMonth,
     1
   ).getDay();
 
-  const isPastDate = (date: string): boolean => {
+  const isPastDate = (date: string) => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
 
@@ -41,19 +38,16 @@ export default function BookingCalendar({
     return d < t;
   };
 
-  const isWeekend = (
-    year: number,
-    month: number,
-    day: number
-  ): boolean => {
+  const isWeekend = (year: number, month: number, day: number) => {
     const d = new Date(year, month, day).getDay();
     return d === 0 || d === 6;
   };
 
-  const handleDateClick = (day: number): void => {
-    const date = `${currentYear}-${String(
-      currentMonth + 1
-    ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const handleDateClick = (day: number) => {
+    const date = `${currentYear}-${String(currentMonth + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
 
     if (
       isPastDate(date) ||
@@ -65,7 +59,7 @@ export default function BookingCalendar({
     onSelectDate(date);
   };
 
-  const changeMonth = (direction: "prev" | "next"): void => {
+  const changeMonth = (direction: "prev" | "next") => {
     if (direction === "prev") {
       if (currentMonth === 0) {
         setCurrentMonth(11);
@@ -85,49 +79,38 @@ export default function BookingCalendar({
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      {/* HEADER */}
       <div className="mb-4 flex items-center justify-between">
         <button
-          type="button"
           onClick={() => changeMonth("prev")}
-          className="rounded-lg border px-3 py-1 text-sm font-semibold hover:bg-slate-100"
+          className="rounded-lg border px-3 py-1 font-semibold hover:bg-slate-100"
         >
           ◀
         </button>
 
         <h2 className="text-lg font-bold text-slate-800">
-          {new Date(currentYear, currentMonth).toLocaleString(
-            "default",
-            {
-              month: "long",
-              year: "numeric",
-            }
-          )}
+          {new Date(currentYear, currentMonth).toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}
         </h2>
 
         <button
-          type="button"
           onClick={() => changeMonth("next")}
-          className="rounded-lg border px-3 py-1 text-sm font-semibold hover:bg-slate-100"
+          className="rounded-lg border px-3 py-1 font-semibold hover:bg-slate-100"
         >
           ▶
         </button>
       </div>
 
-      {/* DAY HEADERS */}
       <div className="grid grid-cols-7 gap-2 text-center text-sm font-semibold text-slate-600">
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-          (d) => (
-            <div key={d}>{d}</div>
-          )
-        )}
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+          <div key={d}>{d}</div>
+        ))}
       </div>
 
-      {/* DATES */}
       <div className="mt-2 grid grid-cols-7 gap-2">
         {Array.from({
-          length:
-            firstDayIndex === 0 ? 6 : firstDayIndex - 1,
+          length: firstDayIndex === 0 ? 6 : firstDayIndex - 1,
         }).map((_, i) => (
           <div key={`empty-${i}`} />
         ))}
@@ -144,23 +127,32 @@ export default function BookingCalendar({
             isWeekend(currentYear, currentMonth, day);
 
           const isSelected = selectedDate === dateStr;
+          const isAvailable = availableDates.includes(dateStr);
 
           return (
             <button
               key={day}
-              type="button"
               disabled={disabled}
               onClick={() => handleDateClick(day)}
-              className={`rounded-lg py-2 font-semibold transition
+              className={`
+                relative rounded-lg py-2 font-semibold transition
                 ${
                   disabled
-                    ? "cursor-not-allowed bg-slate-100 text-slate-400"
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                     : isSelected
-                    ? "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-white ring-2 ring-blue-500 ring-offset-2"
+                    : isAvailable
+                    ? "bg-green-50 text-green-700 border-2 border-green-500 hover:bg-green-100"
                     : "hover:bg-blue-100"
-                }`}
+                }
+              `}
             >
               {day}
+
+              {/* Availability indicator */}
+              {isAvailable && !isSelected && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-green-500 shadow-md" />
+              )}
             </button>
           );
         })}

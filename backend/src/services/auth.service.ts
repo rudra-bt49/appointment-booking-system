@@ -9,7 +9,7 @@ import {
   generateRefreshToken,
 } from "../utils/token";
 import { sendMail } from "../utils/smtp/sendMail";
-import { welcomeSignupTemplate } from "../utils/smtp/emailTemplates";
+import { welcomeSignupTemplate, passwordResetTemplate } from "../utils/smtp/emailTemplates";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -216,4 +216,45 @@ export const getMe = async (userId: number) => {
   }
 
   return user;
+};
+
+export const sendForgotPasswordEmail = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  // Check if user exists
+  if (!user) {
+    throw new Error("Email Not Exists. Please Enter a Valid Email");
+  }
+
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "15m" });
+
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
+
+  await sendMail({
+    to: user.email,
+    subject: "Password Reset Request",
+    html: passwordResetTemplate({
+      fullName: user.fullName || user.email,
+      resetLink,
+      expiryMinutes: 15,
+    }),
+  });
+};
+
+export const resetPasswordWithToken = async (token: string, newPassword: string) => {
+  let payload: any;
+  try {
+    payload = jwt.verify(token, JWT_SECRET) as { userId: number };
+  } catch (err) {
+    throw new Error("Invalid or expired token");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const hashed = await hashPassword(newPassword);
+  await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
 };

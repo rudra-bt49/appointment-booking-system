@@ -21,6 +21,7 @@ export default function RequestAppointmentPage() {
   const doctorUserId: string | null =
     searchParams.get("doctorUserId");
   const [doctorProfileId, setDoctorProfileId] = useState<number | undefined>(undefined);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
@@ -35,6 +36,7 @@ export default function RequestAppointmentPage() {
     const fetchDoctor = async (): Promise<void> => {
       try {
         const res = await getDoctorById(doctorUserId);
+        console.log("doctorProfileId: ",res.data.doctorProfileId);
         setDoctorProfileId(res.data.doctorProfileId);
       } catch (err) {
         console.error(err);
@@ -42,6 +44,24 @@ export default function RequestAppointmentPage() {
     };
     fetchDoctor();
   }, [doctorUserId]);
+
+
+  /* --------------------------------------------
+     STEP 2: Fetch available dates (ONCE)
+  --------------------------------------------- */
+  useEffect(() => {
+    if (!doctorProfileId) return;
+    console.log("doctorProfileId: ",doctorProfileId);
+    availabilityService
+      .getAvailableDates(doctorProfileId)
+      .then((res) => {
+        setAvailableDates(res.data ?? []);
+      })
+      .catch(() => {
+        setAvailableDates([]);
+      });
+  }, [doctorProfileId]);
+
   /* --------------------------------------------
      STEP 2: Fetch slots (FIXED)
   --------------------------------------------- */
@@ -120,7 +140,10 @@ export default function RequestAppointmentPage() {
           </h1>
           {/* CALENDAR + SLOTS */}
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-            <BookingCalendar onSelectDate={handleDateChange} />
+            <BookingCalendar
+              onSelectDate={handleDateChange}
+              availableDates={availableDates}
+            />
             {selectedDate && (
               <div>
                 <h2 className="mb-4 text-lg font-bold text-slate-800">

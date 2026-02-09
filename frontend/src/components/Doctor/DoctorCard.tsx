@@ -1,5 +1,5 @@
+// DoctorCard.tsx
 "use client";
-
 import React from "react";
 import { IDoctor } from "@/types/doctor.types";
 import Link from "next/link";
@@ -22,11 +22,9 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
             <h2 className="truncate text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
               {doctor.fullName}
             </h2>
-
             <p className="truncate text-sm font-medium text-blue-600/80">
               {doctor.specialization}
             </p>
-
             <div className="mt-2">
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${

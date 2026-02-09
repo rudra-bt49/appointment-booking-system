@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { Calendar, Clock, Plus, Trash2, X, AlertCircle } from "lucide-react";
-import DoctorCalendar from "@/components/DoctorCalendar";
+import BookingCalendar from "@/components/patient/BookingCalendar";
 import { availabilityService } from "@/services/availability.service";
 import { getLoggedInDoctorProfileId } from "@/services/doctorIdentity.service";
 import { ITimeSlot, IDoctorAvailability } from "@/types/availability.types";
@@ -12,6 +12,7 @@ export default function AvailabilityPage() {
     new Date().toISOString().split("T")[0]
   );
   const [slots, setSlots] = useState<ITimeSlot[]>([]);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [startDuration, setStartDuration] = useState("");
@@ -25,6 +26,20 @@ export default function AvailabilityPage() {
       .then(setDoctorId)
       .catch(() => setDoctorId(null));
   }, []);
+
+
+  // 🔹 FETCH AVAILABLE DATES (ONCE)
+  useEffect(() => {
+    if (!doctorId) return;
+
+    availabilityService
+      .getAvailableDates(doctorId)
+      .then((res) => {
+        console.log("dates: ",res.data);
+        setAvailableDates(res.data ?? []);
+      })
+      .catch(() => setAvailableDates([]));
+  }, [doctorId]);
 
   useEffect(() => {
     if (!doctorId) return;
@@ -152,7 +167,17 @@ export default function AvailabilityPage() {
               {formatDate(date)}
             </p>
           </div>
-          <DoctorCalendar value={date} onChange={setDate} />
+          {/* <div className="max-w-md mx-auto">
+            <BookingCalendar onSelectDate={setDate} />
+          </div> */}
+          <div className="bg-white rounded-2xl shadow-lg border p-6 mb-6">
+          <div className="max-w-md mx-auto">
+            <BookingCalendar
+              onSelectDate={setDate}
+              availableDates={availableDates}
+            />
+          </div>
+        </div>
         </div>
 
         {/* Time Slots Card */}

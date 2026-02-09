@@ -178,4 +178,25 @@ export const availabilityService = {
 
     return availabilities;
   },
+  async getAvailableDates(payload: { doctorId: number }) {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const availabilities = await prisma.doctorAvailability.findMany({
+      where: {
+        doctorId: payload.doctorId,
+        date: { gte: today },
+      },
+      select: { date: true },
+      orderBy: { date: "asc" },
+    });
+
+    return Array.from(
+      new Set(
+        availabilities.map(a =>
+          a.date.toISOString().split("T")[0]
+        )
+      )
+    );
+  },
 };

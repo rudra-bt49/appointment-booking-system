@@ -47,4 +47,13 @@ export const availabilityController = {
       return errorResponse(res, error.message);
     }
   },
+  async getAvailableDates(req: AuthRequest, res: Response) {
+    try {
+      const data = await availabilityService.getAvailableDates(req.body);
+      return successResponse(res, "Available dates fetched", data);
+    } catch (error: any) {
+      return errorResponse(res, error.message);
+    }
+  },
 };
+

@@ -22,6 +22,19 @@ export const profileValidationSchema = Yup.object({
     .required("Phone number is required")
     .matches(/^\d+$/, "Phone number must contain only digits")
     .length(10, "Phone number must be exactly 10 digits"),
+  
+  password: Yup.string()
+    .notRequired()
+    .min(8, "Password must be at least 8 characters"),
+
+  confirmPassword: Yup.string().when("password", {
+    is: (val: string | undefined) => Boolean(val),
+    then: (schema) =>
+      schema
+        .required("Confirm password is required")
+        .oneOf([Yup.ref("password")], "Passwords do not match"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 
   specialization: Yup.string().when("role", {
     is: "DOCTOR",

@@ -2,6 +2,19 @@ import prisma from "../config/prisma";
 import { DoctorListItem } from "../types/doctor.types";
 import { Role } from "@prisma/client";
 
+const mapDoctor = (d: any): DoctorListItem => ({
+  id: d.id,
+  fullName: d.fullName,
+  email: d.email,
+  phone: d.phone,
+  avatarUrl: d.avatarUrl,
+  specialization: d.doctorProfile.specialization,
+  experience: d.doctorProfile.experience,
+  bio: d.doctorProfile.bio,
+  fees: d.doctorProfile.fees,
+  isAvailable: d.doctorProfile.isAvailable,
+});
+
 export const doctorService = {
   getAllDoctors: async (): Promise<DoctorListItem[]> => {
     const doctors = await prisma.user.findMany({
@@ -97,7 +110,57 @@ export const doctorService = {
     });
 
     return doctorProfile?.id ?? null;
-  }
+  },
+  searchDoctorsByName: async (
+    keyword: string
+  ): Promise<DoctorListItem[]> => {
+    const doctors = await prisma.user.findMany({
+      where: {
+        role: Role.DOCTOR,
+        fullName: {
+          contains: keyword,
+          mode: "insensitive",
+        },
+        doctorProfile: { isAvailable: true },
+      },
+      include: { doctorProfile: true },
+    });
+
+    return doctors
+      .filter((d) => d.doctorProfile)
+      .map(mapDoctor);
+  },
+
+  getAllUniqueSpecializations: async (): Promise<string[]> => {
+    const result = await prisma.doctorProfile.findMany({
+      distinct: ["specialization"],
+      select: { specialization: true },
+    });
+
+    return result.map((s) => s.specialization);
+  },
+
+  getDoctorsBySpecialization: async (
+    specialization: string
+  ): Promise<DoctorListItem[]> => {
+    const doctors = await prisma.user.findMany({
+      where: {
+        role: Role.DOCTOR,
+        doctorProfile: {
+          specialization: {
+            equals: specialization,
+            mode: "insensitive",
+          },
+          isAvailable: true,
+        },
+      },
+      include: { doctorProfile: true },
+    });
+
+    return doctors
+      .filter((d) => d.doctorProfile)
+      .map(mapDoctor);
+  },
 };
 
 

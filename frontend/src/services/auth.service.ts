@@ -39,4 +39,10 @@ export const authService = {
   logout: async (): Promise<void> => {
     await axiosInstance.post(API_ROUTES.AUTH.LOGOUT);
   },
+  forgotPassword: async (email: string): Promise<void> => {
+    await axiosInstance.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email });
+  },
+  resetPassword: async (token: string, password: string, confirmPassword: string): Promise<void> => {
+    await axiosInstance.post(API_ROUTES.AUTH.RESET_PASSWORD, { token, password, confirmPassword });
+  },
 };

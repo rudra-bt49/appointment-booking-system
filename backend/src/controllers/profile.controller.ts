@@ -31,6 +31,17 @@ export const updateProfileController = async (
     // Common validation (password, phone, name, etc.)
     validateUpdateProfileInput(data);
 
+    // 🔐 PASSWORD UPDATE VALIDATION (OPTIONAL)
+    if (data.password || data.confirmPassword) {
+      if (!data.password || !data.confirmPassword) {
+        throw new Error("Both password and confirmPassword are required");
+      }
+
+      if (data.password !== data.confirmPassword) {
+        throw new Error("Password and confirmPassword do not match");
+      }
+    }
+
     // 🔒 ROLE-BASED FIELD VALIDATION
     if (role === Role.DOCTOR) {
       if (data.gender || data.dateOfBirth) {
