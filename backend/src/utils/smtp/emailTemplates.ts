@@ -104,3 +104,18 @@ export const welcomeSignupTemplate = (data: {
     <p><b>Appointment Booking System Team</b></p>
   </div>
 `;
+
+  export const passwordResetTemplate = (data: { fullName: string; resetLink: string; expiryMinutes: number }) => `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2>Password Reset Request</h2>
+      <p>Hi <b>${data.fullName}</b>,</p>
+      <p>We received a request to reset your account password. Click the button below to reset it. This link will expire in <b>${data.expiryMinutes} minutes</b>.</p>
+      <p style="text-align:center; margin: 24px 0;">
+        <a href="${data.resetLink}" style="background:#2563eb;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none;">Reset Password</a>
+      </p>
+      <p>If you did not request a password reset, you can safely ignore this email.</p>
+      <br />
+      <p>Regards,</p>
+      <p><b>Appointment Booking System Team</b></p>
+    </div>
+  `;

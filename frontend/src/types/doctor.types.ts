@@ -1,3 +1,5 @@
+import { ISuccessResponse } from "../types/successResponse.types"
+
 export interface IDoctor {
   id: number;
   fullName: string;
@@ -23,4 +25,25 @@ export interface GetDoctorByIdResponse {
   success: boolean;
   message: string;
   data: IDoctor;
+}
+
+//
+export interface SearchDoctorRequest {
+  keyword: string;
+}
+
+export interface SearchDoctorResponse extends ISuccessResponse {
+  data: IDoctor[];
+}
+
+export interface GetSpecializationsResponse extends ISuccessResponse {
+  data: string[];
+}
+
+export interface FilterDoctorBySpecializationRequest {
+  specialization: string;
+}
+
+export interface FilterDoctorBySpecializationResponse extends ISuccessResponse {
+  data: IDoctor[];
 }

@@ -4,7 +4,9 @@ const ROUTES = {
     LOGIN: "/login",
     REFRESH: "/refresh",
     LOGOUT: "/logout",
-    ME: "/me", 
+    ME: "/me",
+    FORGOT_PASSWORD: "/forgot-password",
+    RESET_PASSWORD: "/reset-password",
   },
   PROFILE: {
     GET_PROFILE: "/get-profile",

@@ -31,7 +31,6 @@ export const getDoctorById = async (
   const accessToken = cookieStore.get("accessToken")?.value;
 
   console.log("Fetching doctor with ID:", id);
-
   if (!accessToken) {
     throw new Error("Unauthorized");
   }

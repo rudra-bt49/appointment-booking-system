@@ -61,3 +61,53 @@ export const getLoggedInDoctorProfileId = async (
     return errorResponse(res, "Failed to fetch doctor profile id", 500);
   }
 };
+
+export const searchDoctorsByName = async (req: Request, res: Response) => {
+  try {
+    const { keyword } = req.body;
+
+    if (!keyword || typeof keyword !== "string") {
+      return errorResponse(res, "Keyword is required", 400);
+    }
+
+    const doctors = await doctorService.searchDoctorsByName(keyword);
+    return successResponse(res, "Doctors fetched successfully", doctors);
+  } catch (error) {
+    return errorResponse(res, "Failed to search doctors", 500);
+  }
+};
+
+export const getDoctorSpecializations = async (_req: Request, res: Response) => {
+  try {
+    const specializations =
+      await doctorService.getAllUniqueSpecializations();
+
+    return successResponse(
+      res,
+      "Doctor specializations fetched successfully",
+      specializations
+    );
+  } catch (error) {
+    return errorResponse(res, "Failed to fetch specializations", 500);
+  }
+};
+
+export const getDoctorsBySpecialization = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { specialization } = req.body;
+
+    if (!specialization) {
+      return errorResponse(res, "Specialization is required", 400);
+    }
+
+    const doctors =
+      await doctorService.getDoctorsBySpecialization(specialization);
+
+    return successResponse(res, "Doctors fetched successfully", doctors);
+  } catch (error) {
+    return errorResponse(res, "Failed to filter doctors", 500);
+  }
+};

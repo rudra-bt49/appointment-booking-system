@@ -15,3 +15,7 @@ export interface GetSlotsByDatePayload {
   doctorId: number;
   date: string;
 }
+
+export interface GetAvailableDatesPayload {
+  doctorId: number;
+}

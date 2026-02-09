@@ -26,6 +26,8 @@ export interface EditProfileApiRequest {
     fullName?: string;
     email?: string;
     phone?: string;
+    password?: string;
+    confirmPassword?: string;
     specialization?: string;
     experience?: number;
     bio?: string;

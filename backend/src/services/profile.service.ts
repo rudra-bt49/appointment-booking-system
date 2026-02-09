@@ -25,7 +25,7 @@ export const updateProfile = async (
 ) => {
   const {
     password,
-    confirmPassword,
+    confirmPassword, // ✅ REMOVE IT HERE
     specialization,
     experience,
     bio,
@@ -36,13 +36,14 @@ export const updateProfile = async (
 
   const userUpdateData: any = { ...userFields };
 
+  // 🔐 Update password only if provided
   if (password) {
     userUpdateData.password = await bcrypt.hash(password, 10);
   }
 
   const user = await prisma.user.update({
     where: { id: userId },
-    data: userUpdateData,
+    data: userUpdateData, // ✅ confirmPassword is NOT sent to Prisma
     include: {
       doctorProfile: role === Role.DOCTOR,
       patientProfile: role === Role.PATIENT,

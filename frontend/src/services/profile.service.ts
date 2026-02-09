@@ -12,7 +12,6 @@ interface ProfileApiResponse {
 export const getProfileServer = async (): Promise<ProfileResponse> => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
-
   if (!accessToken) {
     throw new Error("Unauthorized");
   }
