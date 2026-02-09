@@ -11,8 +11,23 @@ interface PaymentButtonProps {
   fees: number;
 }
 
+interface PaymentExpiryResponse {
+  success: boolean;
+  message: string;
+  data: {
+    expired: boolean;
+  };
+}
+
+interface StripeSessionResponse {
+  success: boolean;
+  data: {
+    sessionUrl: string;
+  };
+}
+
 export default function PaymentButton({
-  appointmentId
+  appointmentId,
 }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,7 +35,7 @@ export default function PaymentButton({
     try {
       setIsLoading(true);
 
-      const expiryRes = await axiosInstance.post(
+      const expiryRes = await axiosInstance.post<PaymentExpiryResponse>(
         API_ROUTES.PAYMENT.CHECK_EXPIRY,
         {
           appointmentId,
@@ -37,7 +52,7 @@ export default function PaymentButton({
         return;
       }
 
-      const stripeRes = await axiosInstance.post(
+      const stripeRes = await axiosInstance.post<StripeSessionResponse>(
         "/stripe/create-checkout-session",
         {
           appointmentId,
