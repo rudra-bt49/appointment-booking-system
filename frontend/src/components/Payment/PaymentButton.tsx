@@ -5,7 +5,6 @@ import axiosInstance from "@/config/axios";
 import Swal from "sweetalert2";
 import { DollarSign } from "lucide-react";
 import API_ROUTES from "@/config/routes";
-import { AxiosResponse } from "axios";
 
 interface PaymentButtonProps {
   appointmentId: string;
@@ -36,13 +35,12 @@ export default function PaymentButton({
     try {
       setIsLoading(true);
 
-      const expiryRes: AxiosResponse<PaymentExpiryResponse> =
-        await axiosInstance.post(
-          API_ROUTES.PAYMENT.CHECK_EXPIRY,
-          {
-            appointmentId,
-          }
-        );
+      const expiryRes = await axiosInstance.post<PaymentExpiryResponse>(
+        API_ROUTES.PAYMENT.CHECK_EXPIRY,
+        {
+          appointmentId,
+        }
+      );
 
       if (expiryRes.data.data.expired) {
         await Swal.fire({
@@ -54,13 +52,12 @@ export default function PaymentButton({
         return;
       }
 
-      const stripeRes: AxiosResponse<StripeSessionResponse> =
-        await axiosInstance.post(
-          "/stripe/create-checkout-session",
-          {
-            appointmentId,
-          }
-        );
+      const stripeRes = await axiosInstance.post<StripeSessionResponse>(
+        "/stripe/create-checkout-session",
+        {
+          appointmentId,
+        }
+      );
 
       const sessionUrl = stripeRes.data.data.sessionUrl;
 
