@@ -28,6 +28,24 @@ const ROUTES = {
     HISTORY_PATIENT: "/history/patient",
     HISTORY_DOCTOR: "/history/doctor",
   },
+  ANALYTICS: {
+    PATIENTS: "/patients",
+
+    REVENUE: "/revenue",
+    REVENUE_TODAY: "/revenue/today",
+    REVENUE_WEEK: "/revenue/week",
+    REVENUE_MONTH: "/revenue/month",
+
+    APPOINTMENT_STATUS: "/appointment-status",
+    APPOINTMENT_STATUS_TODAY: "/appointment-status/today",
+    APPOINTMENT_STATUS_WEEK: "/appointment-status/week",
+    APPOINTMENT_STATUS_MONTH: "/appointment-status/month",
+
+    TIME_SLOTS: "/time-slots",
+    TIME_SLOTS_TODAY: "/time-slots/today",
+    TIME_SLOTS_WEEK: "/time-slots/week",
+    TIME_SLOTS_MONTH: "/time-slots/month",
+  },
   PAYMENT: {
     CHECK_EXPIRY: "/check-expiry",
   }

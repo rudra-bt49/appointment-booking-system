@@ -46,7 +46,7 @@ const EmptyState = ({ status }: { status: AppointmentStatus }) => (
       No {status.toLowerCase()} appointments
     </p>
     <p className="mt-2 text-center text-sm text-gray-400">
-      {`Appointments with status "${status}" will appear here`}
+      Appointments with status &quot;{status}&quot; will appear here
     </p>
   </div>
 );
@@ -82,7 +82,7 @@ export default function DoctorAppointments({
         try {
           setHistoryLoading(true);
           setHistoryError(null);
-          const response = await getDoctorHistoryAppointments();
+          const response = await getDoctorHistoryAppointments() as { data?: DoctorAppointment[] };
           setHistoryAppointments(response.data || []);
           hasHistoryFetched.current = true;
         } catch (error) {

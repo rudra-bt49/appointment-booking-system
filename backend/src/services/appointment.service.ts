@@ -34,6 +34,111 @@ const formatTime = (date: Date) =>
   });
 
 export const appointmentService = {
+  // async createAppointment(userId: number, payload: CreateAppointmentRequest) {
+  //   const patient = await prisma.patientProfile.findUnique({
+  //     where: { userId },
+  //     include: {
+  //       user: {
+  //         select: {
+  //           fullName: true,
+  //           email: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   if (!patient) {
+  //     throw new Error("Patient profile not found");
+  //   }
+
+  //   const doctor = await prisma.doctorProfile.findUnique({
+  //     where: { id: payload.doctorId },
+  //     include: {
+  //       user: {
+  //         select: {
+  //           fullName: true,
+  //           email: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   if (!doctor) {
+  //     throw new Error("Doctor not found");
+  //   }
+
+  //   const timeSlot = await prisma.timeSlot.findUnique({
+  //     where: { id: payload.timeSlotId },
+  //   });
+
+  //   if (!timeSlot) {
+  //     throw new Error("Time slot not found");
+  //   }
+
+  //   if (!timeSlot.isAvailable) {
+  //     throw new Error("Already requested appointment");
+  //   }
+
+  //   try {
+  //     const result = await prisma.$transaction(async (tx) => {
+  //       const appointment = await tx.appointment.create({
+  //         data: {
+  //           doctorId: payload.doctorId,
+  //           patientId: patient.id,
+  //           timeSlotId: payload.timeSlotId,
+  //           notes: payload.notes,
+  //           reportUrl: payload.reportUrl ?? null,
+  //           status: AppointmentStatus.REQUESTED,
+  //         },
+  //         include: {
+  //           doctor: {
+  //             include: {
+  //               user: {
+  //                 select: {
+  //                   fullName: true,
+  //                   email: true,
+  //                 },
+  //               },
+  //             },
+  //           },
+  //           timeSlot: true,
+  //         },
+  //       });
+
+  //       await tx.timeSlot.update({
+  //         where: { id: payload.timeSlotId },
+  //         data: { isAvailable: false },
+  //       });
+
+  //       return appointment;
+  //     });
+
+  //     // ✅ EMAIL → DOCTOR (REQUESTED)
+  //     await sendMail({
+  //       to: doctor.user.email,
+  //       subject: "New Appointment Request",
+  //       html: requestedAppointmentTemplate({
+  //         doctorName: doctor.user.fullName,
+  //         patientName: patient.user.fullName,
+  //         date: formatDate(result.timeSlot.startTime),
+  //         startTime: formatTime(result.timeSlot.startTime),
+  //         endTime: formatTime(result.timeSlot.endTime),
+  //       }),
+  //     });
+
+  //     return result;
+  //   } catch (error: any) {
+  //     if (
+  //       error instanceof Prisma.PrismaClientKnownRequestError &&
+  //       error.code === "P2002"
+  //     ) {
+  //       throw new Error("Already requested appointment");
+  //     }
+
+  //     throw error;
+  //   }
+  // },
+
   async createAppointment(userId: number, payload: CreateAppointmentRequest) {
     const patient = await prisma.patientProfile.findUnique({
       where: { userId },
@@ -46,7 +151,6 @@ export const appointmentService = {
         },
       },
     });
-
     if (!patient) {
       throw new Error("Patient profile not found");
     }
@@ -62,25 +166,38 @@ export const appointmentService = {
         },
       },
     });
-
     if (!doctor) {
       throw new Error("Doctor not found");
     }
 
-    const timeSlot = await prisma.timeSlot.findUnique({
-      where: { id: payload.timeSlotId },
-    });
-
-    if (!timeSlot) {
-      throw new Error("Time slot not found");
-    }
-
-    if (!timeSlot.isAvailable) {
-      throw new Error("Already requested appointment");
-    }
-
     try {
       const result = await prisma.$transaction(async (tx) => {
+        // ✅ CRITICAL FIX: Lock the time slot row first
+        // This prevents concurrent requests from proceeding
+        const timeSlot = await tx.$queryRaw<Array<{
+          id: number;
+          availabilityId: number;
+          startTime: Date;
+          endTime: Date;
+          isAvailable: boolean;
+        }>>`
+        SELECT * FROM "TimeSlot"
+        WHERE id = ${payload.timeSlotId}
+        FOR UPDATE
+      `;
+
+        if (!timeSlot || timeSlot.length === 0) {
+          throw new Error("Time slot not found");
+        }
+
+        const lockedSlot = timeSlot[0];
+
+        // Now check availability AFTER acquiring the lock
+        if (!lockedSlot.isAvailable) {
+          throw new Error("This time slot is no longer available");
+        }
+
+        // Create the appointment
         const appointment = await tx.appointment.create({
           data: {
             doctorId: payload.doctorId,
@@ -105,6 +222,7 @@ export const appointmentService = {
           },
         });
 
+        // Mark slot as unavailable
         await tx.timeSlot.update({
           where: { id: payload.timeSlotId },
           data: { isAvailable: false },
@@ -134,11 +252,9 @@ export const appointmentService = {
       ) {
         throw new Error("Already requested appointment");
       }
-
       throw error;
     }
   },
-
   async getAppointmentsByPatientUserId(
     userId: number
   ): Promise<PatientAppointmentResponse[]> {
