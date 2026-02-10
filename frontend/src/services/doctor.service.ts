@@ -1,5 +1,4 @@
 // src/services/doctor.service.ts
-"use client";
 import axiosInstance from "@/config/axios";
 import API_ROUTES from "@/config/routes";
 import { cookies } from "next/headers";
@@ -10,7 +9,7 @@ export const getAllDoctors = async (): Promise<GetDoctorsResponse> => {
   const accessToken = cookieStore.get("accessToken")?.value;
 
   if (!accessToken) {
-    window.location.href = API_ROUTES.AUTH.LOGIN;
+    throw new Error("Unauthorized");
   }
 
   const res = await axiosInstance.get<GetDoctorsResponse>(
