@@ -1,3 +1,4 @@
+"use client";
 import axiosInstance from "@/config/axios";
 import API_ROUTES from "@/config/routes";
 import {
