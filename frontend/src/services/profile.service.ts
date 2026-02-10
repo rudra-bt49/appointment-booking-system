@@ -32,6 +32,9 @@
 
 
 
+
+
+
 "use client";
 import axiosInstance from "@/config/axios";
 import API_ROUTES from "@/config/routes";
@@ -43,9 +46,12 @@ interface ProfileApiResponse {
   data: ProfileResponse;
 }
 
-export const getProfileClient = async (): Promise<ProfileResponse> => {
+export const getProfileServer = async (): Promise<ProfileResponse> => {
   const res = await axiosInstance.get<ProfileApiResponse>(
-    API_ROUTES.PROFILES.GET_PROFILE
+    API_ROUTES.PROFILES.GET_PROFILE,
+    {
+      withCredentials: true,
+    },
   );
   return res.data.data;
 };
