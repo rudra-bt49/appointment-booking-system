@@ -45,14 +45,14 @@ export const login = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, 
-      sameSite: "strict",
+      secure: true, 
+      sameSite: "none",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, 
-      sameSite: "strict",
+      secure: true, 
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -78,8 +78,8 @@ export const refresh = async (req: Request, res: Response) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // true in prod (HTTPS)
-      sameSite: "strict",
+      secure: true, // true in prod (HTTPS)
+      sameSite: "none",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -101,8 +101,8 @@ export const logout = async (req: AuthRequest, res: Response) => {
 
     res.clearCookie("accessToken", {
       httpOnly: true,
-      sameSite: "strict",
-      secure: false, // true in production
+      sameSite: "none",
+      secure: true, // true in production
     });
 
     return successResponse(res, "Logout successful");
