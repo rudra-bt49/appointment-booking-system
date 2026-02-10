@@ -10,6 +10,7 @@ import BackButton from "@/components/common/BackButton";
 import BookingCalendar from "@/components/patient/BookingCalendar";
 import RequestAppointmentLoader from "@/components/Loader/requestAppointmentLoader";
 import { IDoctorAvailability } from "@/types/availability.types";
+import API_ROUTES from "@/config/routes";
 interface Slot {
   id: number;
   startTime: string;
@@ -118,7 +119,7 @@ export default function RequestAppointmentPage() {
         notes,
         reportFile ?? undefined
       );
-      window.location.href = "/patientAppointments";
+      window.location.href = API_ROUTES.APPOINTMENT.PATIENT_APPOINTMENTS;
     } catch {
       alert("Appointment already booked");
     } finally {

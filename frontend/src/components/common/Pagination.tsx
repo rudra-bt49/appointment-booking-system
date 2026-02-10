@@ -1,4 +1,3 @@
-// src/components/common/Pagination.tsx
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";

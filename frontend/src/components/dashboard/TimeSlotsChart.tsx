@@ -1,4 +1,3 @@
-// components/dashboard/TimeSlotsChart.tsx
 "use client";
 
 import { useState } from "react";

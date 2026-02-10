@@ -1,6 +1,12 @@
 const API_ROUTES = {
   HOME: "/",
+  SIDEBAR: {
+    DASHBOARD: "/dashboard",
+
+  },
   DOCTOR: {
+    DOCTOR_PAGE: "/doctor",
+    DOCTOR_PROFILE_EDIT: "/profile/edit",
     GET_ME_ID: "/doctors/me/id",
     GET_ALL: "/doctors",
     GET_BY_ID: "/doctors/:id",
@@ -11,6 +17,7 @@ const API_ROUTES = {
     FILTER_BY_SPECIALIZATION: "/doctors/filter/specialization",
   },
   AVAILABILITY: {
+    BASE: "/availability",
     CREATE: "/doctor/availability",
     CREATE_SLOTS: "/doctor/availability/:availabilityId/slots",
     GET_MY: "/doctor/availability",
@@ -19,12 +26,17 @@ const API_ROUTES = {
     GET_AVAILABILITY_DATES: "/doctor/availability/dates"
   },
   APPOINTMENT: {
+    PATIENT_APPOINTMENTS: "/patientAppointments",
+    DOCTOR_APPOINTMENTS: "/doctorAppointments",
     REQUEST: "/appointments/request",
     BY_DOCTOR: "/appointments/by-doctor",
     UPDATE_STATUS: "/appointments/update-status",
+    HISTORY_PATIENT: "/appointments/history/patient",
+    HISTORY_DOCTOR: "/appointments/history/doctor",
   },
   PAYMENT: {
-    CHECK_EXPIRY: "/payments/check-expiry"
+    CHECK_EXPIRY: "/payments/check-expiry",
+    STRIPE_CHECKOUT_SESSION: "/stripe/create-checkout-session",
   },
   PROFILE: "/profile",
   PROFILES: {
@@ -41,19 +53,20 @@ const API_ROUTES = {
     RESET_PASSWORD: "/auth/reset-password",
   },
   ANALYTICS: {
-    PATIENTS: "/analytics/patients",
-    REVENUE: "/analytics/revenue",
-    REVENUE_TODAY: "/analytics/revenue/today",
-    REVENUE_WEEK: "/analytics/revenue/week",
-    REVENUE_MONTH: "/analytics/revenue/month",
-    APPOINTMENT_STATUS: "/analytics/appointment-status",
-    APPOINTMENT_STATUS_TODAY: "/analytics/appointment-status/today",
-    APPOINTMENT_STATUS_WEEK: "/analytics/appointment-status/week",
-    APPOINTMENT_STATUS_MONTH: "/analytics/appointment-status/month",
-    TIME_SLOTS: "/analytics/time-slots",
-    TIME_SLOTS_TODAY: "/analytics/time-slots/today",
-    TIME_SLOTS_WEEK: "/analytics/time-slots/week",
-    TIME_SLOTS_MONTH: "/analytics/time-slots/month",
+    ANALYTICS_BASE: "/doctor/analytics",
+    PATIENTS: "/patients",
+    REVENUE: "/revenue",
+    REVENUE_TODAY: "/revenue/today",
+    REVENUE_WEEK: "/revenue/week",
+    REVENUE_MONTH: "/revenue/month",
+    APPOINTMENT_STATUS: "/appointment-status",
+    APPOINTMENT_STATUS_TODAY: "/appointment-status/today",
+    APPOINTMENT_STATUS_WEEK: "/appointment-status/week",
+    APPOINTMENT_STATUS_MONTH: "/appointment-status/month",
+    TIME_SLOTS: "/time-slots",
+    TIME_SLOTS_TODAY: "/time-slots/today",
+    TIME_SLOTS_WEEK: "/time-slots/week",
+    TIME_SLOTS_MONTH: "/time-slots/month",
   },
 };
 

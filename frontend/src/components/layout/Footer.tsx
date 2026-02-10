@@ -1,3 +1,4 @@
+import API_ROUTES from "@/config/routes";
 import Link from "next/link";
 
 export default function Footer() {
@@ -24,26 +25,10 @@ export default function Footer() {
             <ul className="mt-3 space-y-2 text-sm">
               <li>
                 <Link
-                  href="/doctor"
+                  href={API_ROUTES.DOCTOR.DOCTOR_PAGE}
                   className="hover:text-blue-400 transition"
                 >
                   Doctors
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/login"
-                  className="hover:text-blue-400 transition"
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/register"
-                  className="hover:text-blue-400 transition"
-                >
-                  Sign Up
                 </Link>
               </li>
             </ul>
@@ -58,10 +43,10 @@ export default function Footer() {
             <p className="mt-3 text-sm">
               Email:{" "}
               <a
-                href="mailto:rudra0405@gmail.com"
+                href="mailto:ruptl2004@gmail.com"
                 className="hover:text-blue-400 transition"
               >
-                rudra0405@gmail.com
+                rudra@gmail.com
               </a>
             </p>
 

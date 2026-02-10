@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import Input from "@/components/common/Input";
 import { authService } from "@/services/auth.service";
 import { useState, useEffect } from "react";
+import API_ROUTES from "@/config/routes";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     if (!token) {
       Swal.fire({ icon: "error", title: "Invalid Link", text: "Missing token" });
-      router.push("/auth/login");
+      router.push(API_ROUTES.AUTH.LOGIN);
     }
   }, [token, router]);
 

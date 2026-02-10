@@ -17,17 +17,17 @@ import API_ROUTES from "@/config/routes";
 const navItems = [
   {
     label: "Dashboard",
-    href: "/dashboard",
+    href: API_ROUTES.SIDEBAR.DASHBOARD,
     icon: LayoutDashboard,
   },
   {
     label: "Appointments",
-    href: "/doctorAppointments",
+    href: API_ROUTES.APPOINTMENT.DOCTOR_APPOINTMENTS,
     icon: CalendarDays,
   },
   {
     label: "Manage Time Slot",
-    href: "/availability",
+    href: API_ROUTES.AVAILABILITY.BASE,
     icon: Clock,
   },
   {

@@ -1,3 +1,4 @@
+import API_ROUTES from "@/config/routes";
 import { ProfileResponse } from "@/types/profile.types";
 import Link from "next/link";
 
@@ -29,7 +30,7 @@ export default function DoctorProfile({
                 <p className="text-blue-100">{profile.email}</p>
               </div>
                 <Link
-                    href="/profile/edit"
+                    href={API_ROUTES.DOCTOR.DOCTOR_PROFILE_EDIT}
                     className="bg-white text-blue-600 px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-50"
                 >
                 Edit Profile

@@ -1,4 +1,5 @@
 // services/doctorAnalytics.service.ts
+import API_ROUTES from "@/config/routes";
 import axiosInstance from "../config/axios";
 import {
   ApiResponse,
@@ -16,7 +17,7 @@ export const doctorAnalyticsService = {
   async getPatients(): Promise<PatientListingResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<PatientListingResponse[]>
-    >(`${ANALYTICS_BASE}/patients`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.PATIENTS}`);
     return response.data.data;
   },
 
@@ -24,28 +25,28 @@ export const doctorAnalyticsService = {
   async getRevenueAll(): Promise<RevenueByDateResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<RevenueByDateResponse[]>
-    >(`${ANALYTICS_BASE}/revenue`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.REVENUE}`);
     return response.data.data;
   },
 
   async getRevenueToday(): Promise<RevenueByDateResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<RevenueByDateResponse[]>
-    >(`${ANALYTICS_BASE}/revenue/today`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.REVENUE_TODAY}`);
     return response.data.data;
   },
 
   async getRevenueWeek(): Promise<RevenueByDateResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<RevenueByDateResponse[]>
-    >(`${ANALYTICS_BASE}/revenue/week`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.REVENUE_WEEK}`);
     return response.data.data;
   },
 
   async getRevenueMonth(): Promise<RevenueByDateResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<RevenueByDateResponse[]>
-    >(`${ANALYTICS_BASE}/revenue/month`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.REVENUE_MONTH}`);
     return response.data.data;
   },
 
@@ -53,7 +54,7 @@ export const doctorAnalyticsService = {
   async getAppointmentStatusAll(): Promise<AppointmentStatusCountResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<AppointmentStatusCountResponse[]>
-    >(`${ANALYTICS_BASE}/appointment-status`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.APPOINTMENT_STATUS}`);
     return response.data.data;
   },
 
@@ -62,14 +63,14 @@ export const doctorAnalyticsService = {
   > {
     const response = await axiosInstance.post<
       ApiResponse<AppointmentStatusCountResponse[]>
-    >(`${ANALYTICS_BASE}/appointment-status/today`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.APPOINTMENT_STATUS_TODAY}`);
     return response.data.data;
   },
 
   async getAppointmentStatusWeek(): Promise<AppointmentStatusCountResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<AppointmentStatusCountResponse[]>
-    >(`${ANALYTICS_BASE}/appointment-status/week`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.APPOINTMENT_STATUS_WEEK}`);
     return response.data.data;
   },
 
@@ -78,7 +79,7 @@ export const doctorAnalyticsService = {
   > {
     const response = await axiosInstance.post<
       ApiResponse<AppointmentStatusCountResponse[]>
-    >(`${ANALYTICS_BASE}/appointment-status/month`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.APPOINTMENT_STATUS_MONTH}`);
     return response.data.data;
   },
 
@@ -86,28 +87,28 @@ export const doctorAnalyticsService = {
   async getTimeSlotsAll(): Promise<TimeSlotUsageResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<TimeSlotUsageResponse[]>
-    >(`${ANALYTICS_BASE}/time-slots`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.TIME_SLOTS}`);
     return response.data.data;
   },
 
   async getTimeSlotsToday(): Promise<TimeSlotUsageResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<TimeSlotUsageResponse[]>
-    >(`${ANALYTICS_BASE}/time-slots/today`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.TIME_SLOTS_TODAY}`);
     return response.data.data;
   },
 
   async getTimeSlotsWeek(): Promise<TimeSlotUsageResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<TimeSlotUsageResponse[]>
-    >(`${ANALYTICS_BASE}/time-slots/week`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.TIME_SLOTS_WEEK}`);
     return response.data.data;
   },
 
   async getTimeSlotsMonth(): Promise<TimeSlotUsageResponse[]> {
     const response = await axiosInstance.post<
       ApiResponse<TimeSlotUsageResponse[]>
-    >(`${ANALYTICS_BASE}/time-slots/month`);
+    >(`${ANALYTICS_BASE}${API_ROUTES.ANALYTICS.TIME_SLOTS_MONTH}`);
     return response.data.data;
   },
 

@@ -3,6 +3,7 @@
 import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import API_ROUTES from "@/config/routes";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function PaymentSuccessPage() {
       icon: "success",
       confirmButtonText: "Go to Home",
     }).then(() => {
-      router.push("/");
+      router.push(API_ROUTES.HOME);
     });
   }, [router]);
 
