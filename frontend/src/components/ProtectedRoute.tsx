@@ -4,6 +4,7 @@ import { useAuth } from "@/context/auth.context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Loader from "../components/Loader/Loader";
+import API_ROUTES from "@/config/routes";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,13 +22,13 @@ export default function ProtectedRoute({
     // Check authentication status
     if (!isAuthenticated) {
       // Redirect to login if not authenticated
-      router.replace("/auth/login");
+      router.replace(API_ROUTES.AUTH.LOGIN);
       return;
     }
 
     // Check if user has required role
     if (requiredRole && user?.data?.role !== requiredRole) {
-      router.replace("/");
+      router.replace(API_ROUTES.HOME);
       return;
     }
   }, [isAuthenticated, user, requiredRole, router]);

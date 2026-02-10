@@ -102,7 +102,7 @@ export default function LoginPage() {
               {/* Forgot Password Link */}
               <div className="flex justify-end animate-in fade-in duration-500 delay-200">
                 <Link
-                  href="/auth/forgot-password"
+                  href={API_ROUTES.AUTH.FORGOT_PASSWORD}
                   className="text-sm font-medium text-blue-600 hover:text-purple-600 hover:underline transition"
                 >
                   Forgot password?
@@ -153,21 +153,6 @@ export default function LoginPage() {
                     Sign Up
                   </Link>
                 </p>
-              </div>
-
-              {/* Additional Features */}
-              <div className="pt-6 border-t border-gray-100 animate-in fade-in duration-500 delay-400">
-                <div className="flex items-center justify-center gap-6 text-xs text-gray-500">
-                  <Link href="#" className="hover:text-blue-600 transition flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    Privacy Policy
-                  </Link>
-                  <span>•</span>
-                  <Link href="#" className="hover:text-purple-600 transition flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                    Terms of Service
-                  </Link>
-                </div>
               </div>
             </Form>
           )}

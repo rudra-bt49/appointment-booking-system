@@ -1,5 +1,3 @@
-// src/services/doctor.client.service.ts
-// Client-side doctor service for public endpoints (no cookies needed)
 import axiosInstance from "@/config/axios";
 import API_ROUTES from "@/config/routes";
 import {

@@ -14,10 +14,23 @@ const ROUTES = {
   },
   DOCTOR: {
     GET_ALL: "/doctors",
-    GET_BY_ID: "/doctors/:id",
+    GET_BY_ID: "/:id",
+    LOGGED_IN_DOCTOR_PROFILE_ID: "/me/id",
+    GET_ALL_DOCTORS: "/",
+    GET_DOCTOR_BY_ID: "/:id",
+    SEARCH_DOCTOR: "/search",
+    GET_DOCTOR_SPECIALIZATION: "/specializations/all",
+    FILTER_DOCTORS: "/filter/specialization",
   },
   DOCTOR_AVAILABILITY: {
     BASE: "/doctor",
+  },
+  AVAILABILITY: {
+    CREATE_AVAILABILITY: "/availability",
+    GET_MY_AVAILABILITY: "/availability",
+    DELETE_SLOT: "/slots/:slotId",
+    GET_SLOTS_BY_DOCTOR_AND_DATE: "/availability/slots/by-date",
+    GET_AVAILABLE_DATES: "/availability/dates"
   },
   APPOINTMENT: {
     REQUEST: "/request",
@@ -48,6 +61,8 @@ const ROUTES = {
   },
   PAYMENT: {
     CHECK_EXPIRY: "/check-expiry",
+    CREATE_CHECKOUT_SESSION: "/create-checkout-session",
+    WEBHOOK: "/webhook"
   }
 };
 

@@ -25,7 +25,7 @@ export default function AppShell({
   // 🔒 redirect
   useEffect(() => {
     if (shouldRedirectDoctorFromHome) {
-      router.replace(API_ROUTES.PROFILE);
+      router.replace(API_ROUTES.SIDEBAR.DASHBOARD);
     }
   }, [shouldRedirectDoctorFromHome, router]);
 

@@ -1,10 +1,5 @@
 import * as Yup from "yup";
-
-const EMAIL_REGEX =
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const FULL_NAME_REGEX =
-  /^[A-Za-z]+(?:\s+[A-Za-z]+)+$/;
+import { EMAIL_REGEX, FULL_NAME_REGEX} from "../utils/regex";
 
 export const profileValidationSchema = Yup.object({
   fullName: Yup.string()

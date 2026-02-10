@@ -1,47 +1,8 @@
-// import { Router } from "express";
-// import { availabilityController } from "../controllers/availability.controller";
-// import { authMiddleware } from "../middlewares/auth.middleware";
-// import { doctorOnlyMiddleware } from "../middlewares/doctor.middleware";
-
-// const router = Router();
-
-// router.use(authMiddleware);
-
-// router.post(
-//   "/availability", doctorOnlyMiddleware,
-//   availabilityController.createAvailability
-// );
-
-// router.get(
-//   "/availability",
-//   availabilityController.getMyAvailability
-// );
-
-// router.delete(
-//   "/slots/:slotId", doctorOnlyMiddleware,
-//   availabilityController.deleteTimeSlot
-// );
-
-// router.post(
-//   "/availability/slots/by-date",
-//   availabilityController.getSlotsByDoctorAndDate
-// );
-
-// router.post(
-//   "/availability/dates",
-//   availabilityController.getAvailableDates
-// );
-
-// export default router;
-
-
-
-
-
 import { Router } from "express";
 import { availabilityController } from "../controllers/availability.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { doctorOnlyMiddleware } from "../middlewares/doctor.middleware";
+import ROUTES from "../config/routes";
 
 const router = Router();
 
@@ -50,19 +11,19 @@ router.use(authMiddleware);
 /* ---------------- DOCTOR ONLY ---------------- */
 
 router.post(
-  "/availability",
+  ROUTES.AVAILABILITY.CREATE_AVAILABILITY,
   doctorOnlyMiddleware,
   availabilityController.createAvailability
 );
 
 router.get(
-  "/availability",
+  ROUTES.AVAILABILITY.GET_MY_AVAILABILITY,
   doctorOnlyMiddleware,
   availabilityController.getMyAvailability
 );
 
 router.delete(
-  "/slots/:slotId",
+  ROUTES.AVAILABILITY.DELETE_SLOT,
   doctorOnlyMiddleware,
   availabilityController.deleteTimeSlot
 );
@@ -70,12 +31,12 @@ router.delete(
 /* ---------------- PUBLIC (BOOKING) ---------------- */
 
 router.post(
-  "/availability/slots/by-date",
+  ROUTES.AVAILABILITY.GET_SLOTS_BY_DOCTOR_AND_DATE,
   availabilityController.getSlotsByDoctorAndDate
 );
 
 router.post(
-  "/availability/dates",
+  ROUTES.AVAILABILITY.GET_AVAILABLE_DATES,
   availabilityController.getAvailableDates
 );
 

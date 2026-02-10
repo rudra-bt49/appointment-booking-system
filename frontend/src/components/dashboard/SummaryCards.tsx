@@ -1,4 +1,3 @@
-// components/dashboard/SummaryCards.tsx
 "use client";
 import { DoctorAnalyticsData } from "@/types/doctorAnalytics.types";
 import {

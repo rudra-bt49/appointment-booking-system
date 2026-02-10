@@ -129,7 +129,7 @@ export const updateAppointmentStatus = async (
 ----------------------------------------- */
 export const getPatientHistoryAppointments = async () => {
   const res = await axiosInstance.get(
-    "/appointments/history/patient"
+    API_ROUTES.APPOINTMENT.HISTORY_PATIENT
   );
   return res.data;
 };
@@ -139,7 +139,7 @@ export const getPatientHistoryAppointments = async () => {
 ----------------------------------------- */
 export const getDoctorHistoryAppointments = async () => {
   const res = await axiosInstance.get(
-    "/appointments/history/doctor"
+    API_ROUTES.APPOINTMENT.HISTORY_DOCTOR
   );
   return res.data;
 };

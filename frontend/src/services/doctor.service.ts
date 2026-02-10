@@ -9,7 +9,7 @@ export const getAllDoctors = async (): Promise<GetDoctorsResponse> => {
   const accessToken = cookieStore.get("accessToken")?.value;
 
   if (!accessToken) {
-    throw new Error("Unauthorized");
+    window.location.href = API_ROUTES.AUTH.LOGIN;
   }
 
   const res = await axiosInstance.get<GetDoctorsResponse>(

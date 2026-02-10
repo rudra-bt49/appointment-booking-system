@@ -68,18 +68,17 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
   try {
-    const refreshToken = req.body.refreshToken;
+    const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      return errorResponse(res, "Refresh token is required", 400);
+      return errorResponse(res, "Refresh token missing", 401);
     }
 
-    const { accessToken, user } =
-      await refreshAccessToken(refreshToken);
+    const { accessToken, user } = await refreshAccessToken(refreshToken);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: false, // true in prod (HTTPS)
       sameSite: "strict",
       maxAge: 15 * 60 * 1000,
     });

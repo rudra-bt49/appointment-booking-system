@@ -53,7 +53,7 @@ export default function PaymentButton({
       }
 
       const stripeRes = await axiosInstance.post<StripeSessionResponse>(
-        "/stripe/create-checkout-session",
+        API_ROUTES.PAYMENT.STRIPE_CHECKOUT_SESSION,
         {
           appointmentId,
         }

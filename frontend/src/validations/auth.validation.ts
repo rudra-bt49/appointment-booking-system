@@ -1,19 +1,5 @@
 import * as Yup from "yup";
-
-/**
- * These regexes mirror backend intent
- */
-const EMAIL_REGEX =
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
-
-const FULL_NAME_REGEX =
-  /^[A-Za-z]+(?:\s+[A-Za-z]+)+$/;
-
-const PHONE_REGEX =
-  /^\d{10}$/;
+import { EMAIL_REGEX, PASSWORD_REGEX, FULL_NAME_REGEX, PHONE_REGEX} from "../utils/regex";
 
 export const loginValidationSchema = Yup.object({
   email: Yup.string()
