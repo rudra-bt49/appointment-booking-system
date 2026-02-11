@@ -21,41 +21,52 @@
 
 
 
-import { cookies } from "next/headers";
-import { getProfileServer } from "@/services/profile.service";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getProfile } from "@/services/profile.service";
 import EditProfileForm from "./EditProfileForm";
-import { redirect } from "next/navigation";
 import API_ROUTES from "@/config/routes";
 import { ProfileResponse } from "@/types/profile.types";
 
-export default async function EditProfilePage() {
-  let profile: ProfileResponse | null = null;
+export default function EditProfilePage() {
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  try {
-    // Get cookies from the request
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch {
+        console.error("Error fetching profile for edit:");
+        router.push(API_ROUTES.AUTH.LOGIN);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Check if we have any cookies (basic auth check)
-    if (!cookieHeader) {
-      console.log("No cookies found, redirecting to login");
-      redirect(API_ROUTES.AUTH.LOGIN);
-    }
+    fetchProfile();
+  }, [router]);
 
-    // Fetch profile with cookies
-    profile = await getProfileServer(cookieHeader);
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Validate profile data
-    if (!profile) {
-      console.error("Invalid profile data received");
-      redirect(API_ROUTES.AUTH.LOGIN);
-    }
-  } catch (error) {
-    console.error("Error fetching profile for edit:", error);
-    redirect(API_ROUTES.AUTH.LOGIN);
+  // No profile state (will redirect in useEffect)
+  if (!profile) {
+    return null;
   }
 
   return <EditProfileForm profile={profile} />;
