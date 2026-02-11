@@ -215,83 +215,29 @@ export const requestAppointment = async (
 };
 
 /* ----------------------------------------
-   Get my appointments (SERVER SAFE)
+   Get my appointments (CLIENT SIDE)
 ----------------------------------------- */
-export const getMyAppointmentsServer = async (
-  cookieHeader: string
-): Promise<IGetMyAppointmentsResponse> => {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    
-    if (!apiUrl) {
-      throw new Error("API base URL is not configured");
+export const getMyAppointments = async (): Promise<IGetMyAppointmentsResponse> => {
+  const res = await axiosInstance.get<IGetMyAppointmentsResponse>(
+    "/appointments/my",
+    {
+      withCredentials: true,
     }
-
-    const res = await fetch(`${apiUrl}/appointments/my`, {
-      method: "GET",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("API Error:", res.status, errorText);
-      throw new Error(`Failed to fetch appointments: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error("getMyAppointmentsServer error:", error);
-    throw error;
-  }
+  );
+  return res.data;
 };
 
 /* ----------------------------------------
-   Get doctor appointments (SERVER SAFE)
+   Get doctor appointments (CLIENT SIDE)
 ----------------------------------------- */
-export const getDoctorAppointmentsServer = async (
-  cookieHeader: string
-) => {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    
-    if (!apiUrl) {
-      throw new Error("API base URL is not configured");
+export const getDoctorAppointments = async () => {
+  const res = await axiosInstance.get(
+    "/appointments/by-doctor",
+    {
+      withCredentials: true,
     }
-
-    const res = await fetch(`${apiUrl}/appointments/by-doctor`, {
-      method: "GET",
-      headers: {
-        Cookie: cookieHeader,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("API Error:", res.status, errorText);
-      throw new Error(`Failed to fetch doctor appointments: ${res.status}`);
-    }
-
-    const data = await res.json();
-    
-    // Validate response structure
-    if (!data || typeof data !== 'object') {
-      console.error("Invalid response format:", data);
-      return { data: [] };
-    }
-
-    return data;
-  } catch (error) {
-    console.error("getDoctorAppointmentsServer error:", error);
-    // Return empty data instead of throwing to prevent page crash
-    return { data: [] };
-  }
+  );
+  return res.data;
 };
 
 /* ----------------------------------------
