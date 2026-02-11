@@ -28,50 +28,60 @@
 
 
 
-import { cookies } from "next/headers";
-import { getProfileServer } from "@/services/profile.service";
+"use client";
+
+import { useEffect, useState } from "react";
+import { getProfile } from "@/services/profile.service";
 import DoctorProfile from "../../components/Doctor/DoctorProfile";
 import PatientProfile from "../../components/patient/PatientProfile";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ProfileResponse } from "@/types/profile.types";
 import API_ROUTES from "@/config/routes";
 
-export default async function ProfilePage() {
-  let profile: ProfileResponse | null = null;
+export default function ProfilePage() {
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  try {
-    // Get cookies from the request
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await getProfile(); // Uses axios with withCredentials
+        setProfile(data);
+      } catch {
+        console.error("Error fetching profile:");
+        // Redirect to login on error
+        router.push(API_ROUTES.AUTH.LOGIN);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Check if we have any cookies (basic auth check)
-    if (!cookieHeader) {
-      console.log("No cookies found, redirecting to login");
-      redirect(API_ROUTES.AUTH.LOGIN);
-    }
+    fetchProfile();
+  }, [router]);
 
-    // Fetch profile with cookies
-    profile = await getProfileServer(cookieHeader);
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Validate profile data
-    if (!profile || !profile.role) {
-      console.error("Invalid profile data received");
-      redirect(API_ROUTES.AUTH.LOGIN);
-    }
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    redirect(API_ROUTES.AUTH.LOGIN);
+  // No profile state
+  if (!profile) {
+    return null; // Will redirect in useEffect
   }
 
   // Render appropriate profile based on role
   if (profile.role === "DOCTOR") {
-    console.log("Rendering doctor profile for:", profile.fullName);
     return <DoctorProfile profile={profile} />;
   }
 
-  console.log("Rendering patient profile for:", profile.fullName);
   return <PatientProfile profile={profile} />;
 }
