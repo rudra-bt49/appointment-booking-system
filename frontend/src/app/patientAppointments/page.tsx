@@ -37,6 +37,12 @@ import AppointmentsList from "@/components/patient/AppointmentsList";
 import { IPatientAppointment } from "@/types/patientAppointment.types";
 import API_ROUTES from "@/config/routes";
 
+interface MyAppointmentsResponse {
+  success: boolean;
+  message: string;
+  data: IPatientAppointment[];
+}
+
 export default function PatientAppointmentsPage() {
   const [appointments, setAppointments] = useState<IPatientAppointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +54,7 @@ export default function PatientAppointmentsPage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await getMyAppointments();
+        const response = await getMyAppointments() as MyAppointmentsResponse;
 
         // Validate response structure
         if (response && response.data && Array.isArray(response.data)) {

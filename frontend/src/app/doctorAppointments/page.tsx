@@ -37,6 +37,12 @@ import { getDoctorAppointments } from "@/services/appointment.service";
 import { DoctorAppointment } from "@/types/doctorAppointment.types";
 import API_ROUTES from "@/config/routes";
 
+interface DoctorAppointmentsResponse {
+  success: boolean;
+  message: string;
+  data: DoctorAppointment[];
+}
+
 export default function DoctorAppointmentsPage() {
   const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +54,7 @@ export default function DoctorAppointmentsPage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await getDoctorAppointments();
+        const response = await getDoctorAppointments() as DoctorAppointmentsResponse;
 
         // Validate response structure
         if (response && response.data && Array.isArray(response.data)) {
