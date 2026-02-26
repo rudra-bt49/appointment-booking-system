@@ -19,22 +19,36 @@ export default function AppShell({
   const pathname = usePathname();
   const router = useRouter();
 
+  /* ================= AUTH PAGE DETECTION ================= */
+
+  const isAuthPage =
+    pathname.startsWith(API_ROUTES.AUTH.LOGIN) ||
+    pathname.startsWith(API_ROUTES.AUTH.REGISTER) ||
+    pathname.startsWith(API_ROUTES.AUTH.FORGOT_PASSWORD) ||
+    pathname.startsWith(API_ROUTES.AUTH.RESET_PASSWORD);
+
+  /* 🔒 redirect doctor from home */
   const shouldRedirectDoctorFromHome =
     role === "DOCTOR" && pathname === API_ROUTES.HOME;
 
-  // 🔒 redirect
   useEffect(() => {
     if (shouldRedirectDoctorFromHome) {
       router.replace(API_ROUTES.SIDEBAR.DASHBOARD);
     }
   }, [shouldRedirectDoctorFromHome, router]);
 
-  // 🚫 PREVENT FIRST PAINT → NO FLICKER
   if (shouldRedirectDoctorFromHome) {
     return null;
   }
 
-  /* ---------------- DOCTOR LAYOUT ---------------- */
+  /* ================= AUTH LAYOUT (NO NAVBAR / FOOTER) ================= */
+
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
+  /* ================= DOCTOR LAYOUT ================= */
+
   if (role === "DOCTOR") {
     return (
       <div className="flex min-h-screen bg-gray-50">
@@ -44,7 +58,8 @@ export default function AppShell({
     );
   }
 
-  /* ---------------- PATIENT / PUBLIC LAYOUT ---------------- */
+  /* ================= PATIENT / PUBLIC LAYOUT ================= */
+
   return (
     <>
       <Navbar />

@@ -16,7 +16,6 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
           <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-xl font-bold text-white shadow-inner">
             {doctor.fullName.charAt(0)}
           </div>
-
           {/* Name, Specialization & Status */}
           <div className="flex-1 min-w-0">
             <h2 className="truncate text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
@@ -43,7 +42,6 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
             </div>
           </div>
         </div>
-
         {/* Details */}
         <div className="mt-6 space-y-3">
           <div className="flex items-center gap-3 text-sm text-slate-600">
@@ -57,7 +55,6 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
               Experience
             </span>
           </div>
-
           <div className="flex items-center gap-3 text-sm text-slate-600">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
               <FeeIcon />
@@ -70,7 +67,6 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
             </span>
           </div>
         </div>
-
         {/* Bio */}
         {doctor.bio && (
           <div className="mt-5 border-t border-slate-100 pt-4">
@@ -80,12 +76,20 @@ export default function DoctorCard({ doctor }: { doctor: IDoctor }) {
           </div>
         )}
       </div>
-
-      <Link href={`/doctor/${doctor.id}`}>
-        <button className="mt-6 w-full rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-600 active:scale-95">
-          View Profile
-        </button>
-      </Link>
+      
+      {/* Action Buttons */}
+      <div className="mt-6 flex gap-2">
+        <Link href={`/doctor/${doctor.id}`} className="flex-1">
+          <button className="w-full rounded-xl bg-slate-900 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-700 active:scale-95">
+            View Profile
+          </button>
+        </Link>
+        <Link href={`/requestAppointment?doctorUserId=${doctor.id}`} className="flex-1">
+          <button className="w-full rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-95">
+            Book
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
