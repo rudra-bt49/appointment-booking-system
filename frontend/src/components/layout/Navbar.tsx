@@ -72,6 +72,22 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {/* Find Doctors */}
+                <Link
+                  href="/doctor"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
+                >
+                  Find Doctors
+                </Link>
+
+                {/* My Appointments */}
+                <Link
+                  href="/patientAppointments"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition"
+                >
+                  My Appointments
+                </Link>
+
                 {/* Profile Icon */}
                 <Link
                   href={API_ROUTES.PROFILE}
@@ -81,6 +97,7 @@ export default function Navbar() {
                   <User size={20} className="text-gray-700" />
                 </Link>
 
+                {/* Logout Button */}
                 <button
                   onClick={handleLogout}
                   className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition"
